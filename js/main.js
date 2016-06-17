@@ -10,6 +10,8 @@
     var stumpSpaceY = 5;
     var myRaccoonStumpStartX = 150;
     var myRaccoonStumpStartY = 480;
+    var stumpIndent = [0, 8, 16, 24, 24, 16, 8, 0]  
+    
    
     playGame.prototype = {
 
@@ -102,12 +104,12 @@
             for (var i=0; i < stumpsArray.length; i++){
                 for (var j=0; j < 3; j++ ){
                     if (stumpsArray[i][j] == 1){
-                    game.add.image(myRaccoonStumpStartX + i * (stumpSizeX + stumpSpaceX), myRaccoonStumpStartY + j * (stumpSizeY + stumpSpaceY), "stump");
+                    game.add.image(myRaccoonStumpStartX + i * (stumpSizeX + stumpSpaceX), myRaccoonStumpStartY + j * (stumpSizeY + stumpSpaceY) + stumpIndent[i], "stump");
                 
                 }
             }
         }
-        
+        }
         
 //function render() {
 //
