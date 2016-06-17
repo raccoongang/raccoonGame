@@ -36,7 +36,6 @@
             game.add.sprite(0, 0, 'landscape');
             this.drawStumps(stumpsArray);
             this.raccoon = game.add.sprite(350, 650, 'raccoon_side', 0);
-            console.log(this.raccoon.x);
             this.raccoon.anchor.setTo(0.5, 0.5);
             this.physics.arcade.enable(this.raccoon);
             this.raccoon.body.collideWorldBounds = true;
