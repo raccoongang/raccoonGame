@@ -1,0 +1,95 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>hello phaser!</title>
+        <script src="phaser.min.js"></script>
+    </head>
+    <body>
+
+    <script type="text/javascript">
+
+    window.onload = function() {
+
+        
+    var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'phaser-example', { preload: preload, create: create,  update: update });
+    var cursors;
+function preload() {
+
+    game.load.atlasJSONHash('bot', '/assets/running_bot.png', '/assets/running_bot.json');
+    game.load.spritesheet('mummy', '/assets/metalslug_mummy37x45.png', 37, 45, 18);
+    
+   
+
+}
+
+var bot;
+
+
+function create() {
+    
+    game.physics.startSystem(Phaser.Physics.ARCADE);
+
+    bot = game.add.sprite(200, 200, 'bot');
+    
+   
+    
+
+    bot.animations.add('run');
+
+    bot.animations.play('run', 15, true);
+
+    game.input.onDown.addOnce(changeMummy, this);
+    cursors = game.input.keyboard.createCursorKeys();
+    game.physics.arcade.enable(bot);
+
+}
+
+function changeMummy() {
+
+    bot.loadTexture('mummy', 0);
+
+    bot.animations.add('walk');
+
+    bot.animations.play('walk', 30, true);
+
+}
+
+                
+function update(){
+    bot.body.velocity.x = 0;
+    if (cursors.left.isDown)
+    {
+        //  Move to the left
+        bot.body.velocity.x = -150;
+
+        bot.animations.play('run');
+    }
+     else if (cursors.right.isDown)
+    {
+        //  Move to the right
+        bot.body.velocity.x = 150;
+
+        bot.animations.play('run');
+    }
+    else
+    {
+        //  Stand still
+        bot.animations.stop();
+
+        bot.frame = 4;
+    }
+    
+}
+        
+//function render() {
+//
+//    game.debug.body(bot);
+//
+//}
+
+    };
+
+    </script>
+    </body>
+</html>
