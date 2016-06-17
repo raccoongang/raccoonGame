@@ -3,9 +3,9 @@
     var game = new Phaser.Game(1200, 900, Phaser.CANVAS, 'game-container');
     var cursors;
     var playGame = function(game){}
-    
+
     playGame.prototype = {
-        
+
          preload: function() {
             game.load.atlasJSONHash('bot', '/assets/running_bot.png', '/assets/running_bot.json');
             game.load.spritesheet('mummy', '/assets/metalslug_mummy37x45.png', 37, 45, 18);
@@ -14,6 +14,7 @@
 
 
          create: function() {
+            var stumpsArray = this.arrageStumps();
 
             game.physics.startSystem(Phaser.Physics.ARCADE);
 
@@ -33,7 +34,7 @@
             this.bot.animations.play('walk', 30, true);
         },
 
-                
+
         update: function(){
             this.bot.body.velocity.x = 0;
             if (cursors.left.isDown)
@@ -58,8 +59,28 @@
                 this.bot.frame = 4;
             }
 
+        },
+
+        arrageStumps: function() {
+            var stumpsArray = [
+                [1, 0, 0],
+                [0, 0, 1],
+                [0, 1, 0],
+                [0, 0, 1],
+                [0, 1, 1],
+                [1, 1, 0],
+                [1, 0, 1],
+                [1, 1, 1]
+            ];
+            for (i = 0; i < stumpsArray.length; i++) {
+                j = Math.floor(Math.random() * (i + 1));
+                temp = stumpsArray[i];
+                stumpsArray[i] = stumpsArray[j];
+                stumpsArray[j] = temp;
+            }
+            return stumpsArray;
         }
-        
+
 //function render() {
 //
 //    game.debug.body(bot);
