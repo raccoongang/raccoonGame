@@ -5,19 +5,21 @@
     var playGame = function(game){}
     var step = 220;
     var stumpSizeX = 102;
-    var stumpSizeY = 52;  
+    var stumpSizeY = 52;
     var stumpSpaceX = 14;
     var stumpSpaceY = 5;
     var myRaccoonStumpStartX = 150;
     var myRaccoonStumpStartY = 480;
-    var stumpIndent = [0, 8, 16, 24, 24, 16, 8, 0]  
-    
-   
+    var stumpIndent = [0, 8, 16, 24, 24, 16, 8, 0]
+    var ip = "127.0.0.1";
+    var sock = new WebSocket("ws://" + ip + ":5678/ws");
+
+
     playGame.prototype = {
 
          preload: function() {
             game.load.spritesheet('landscape', '/assets/landscape.jpg');
-            game.load.spritesheet('raccoon_side', '/assets/raccoon_side.png', 159, 153) 
+            game.load.spritesheet('raccoon_side', '/assets/raccoon_side.png', 159, 153)
             game.load.spritesheet('stump', '/assets/stump.png');
 //            game.load.atlasJSONHash('bot', '/assets/running_bot.png', '/assets/running_bot.json');
 //            game.load.spritesheet('mummy', '/assets/metalslug_mummy37x45.png', 37, 45, 18);
@@ -27,18 +29,28 @@
 
          create: function() {
             var stumpsArray = this.arrageStumps();
-            game.world.bounds = new Phaser.Rectangle(100, 50, 1000, 700); 
+            game.world.bounds = new Phaser.Rectangle(100, 50, 1000, 700);
             game.physics.startSystem(Phaser.Physics.ARCADE);
             game.physics.setBoundsToWorld();
 
-            game.add.sprite(0, 0, 'landscape'); 
-            this.drawStumps(stumpsArray); 
+            game.add.sprite(0, 0, 'landscape');
+            this.drawStumps(stumpsArray);
             this.raccoon = game.add.sprite(350, 650, 'raccoon_side', 0);
+            console.log(this.raccoon.x);
             this.raccoon.anchor.setTo(0.5, 0.5);
             this.physics.arcade.enable(this.raccoon);
             this.raccoon.body.collideWorldBounds = true;
-             
-            
+            var pos = this.getPos(this.raccoon);
+
+            sock.onopen = function() {
+                sock.send(pos);
+            };
+
+            sock.onmessage = function(message) {
+                console.log(JSON.parse(message.data));
+            };
+
+
 //            this.bot.animations.add('run');
 //            this.bot.animations.play('run', 15, true);
 
@@ -61,6 +73,7 @@
                 //  Move to the left
                 this.raccoon.loadTexture('raccoon_side', 0);
                 this.raccoon.body.velocity.x = -step;
+                this.sendToWS(this.getPos(this.raccoon));
 //                this.raccoon.animations.play('run');
             }
              else if (cursors.right.isDown)
@@ -68,6 +81,7 @@
                 //  Move to the right
                 this.raccoon.loadTexture('raccoon_side', 1);
                 this.raccoon.body.velocity.x = step;
+                this.sendToWS(this.getPos(this.raccoon));
 //                this.raccoon.animations.play('run');
             }
 //            else
@@ -99,18 +113,30 @@
             }
             return stumpsArray;
         },
-        
+
         drawStumps: function(stumpsArray){
             for (var i=0; i < stumpsArray.length; i++){
                 for (var j=0; j < 3; j++ ){
                     if (stumpsArray[i][j] == 1){
                     game.add.image(myRaccoonStumpStartX + i * (stumpSizeX + stumpSpaceX), myRaccoonStumpStartY + j * (stumpSizeY + stumpSpaceY) + stumpIndent[i], "stump");
-                
+
+                    }
                 }
             }
+        },
+
+        getPos: function(object) {
+            var pos = JSON.stringify({
+                x: object.x,
+                y: object.y
+            });
+            return pos;
+        },
+
+        sendToWS: function(pos) {
+            sock.send(pos);
         }
-        }
-        
+
 //function render() {
 //
 //    game.debug.body(bot);
