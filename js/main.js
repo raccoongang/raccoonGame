@@ -1,74 +1,64 @@
   window.onload = function() {
 
-    var game = new Phaser.Game(1200, 900, Phaser.CANVAS, 'game-container', { preload: preload, create: create,  update: update });
+    var game = new Phaser.Game(1200, 900, Phaser.CANVAS, 'game-container');
     var cursors;
-function preload() {
-
-    game.load.atlasJSONHash('bot', '/assets/running_bot.png', '/assets/running_bot.json');
-    game.load.spritesheet('mummy', '/assets/metalslug_mummy37x45.png', 37, 45, 18);
+    var playGame = function(game){}
     
-   
+    playGame.prototype = {
+        
+         preload: function() {
+            game.load.atlasJSONHash('bot', '/assets/running_bot.png', '/assets/running_bot.json');
+            game.load.spritesheet('mummy', '/assets/metalslug_mummy37x45.png', 37, 45, 18);
+        },
 
-}
-
-var bot;
 
 
-function create() {
-    
-    game.physics.startSystem(Phaser.Physics.ARCADE);
+         create: function() {
 
-    bot = game.add.sprite(200, 200, 'bot');
-    
-   
-    
+            game.physics.startSystem(Phaser.Physics.ARCADE);
 
-    bot.animations.add('run');
+            this.bot = game.add.sprite(200, 200, 'bot');
+            this.bot.animations.add('run');
+            this.bot.animations.play('run', 15, true);
 
-    bot.animations.play('run', 15, true);
+            this.input.onDown.addOnce(this.changeMummy, this);
+            cursors = game.input.keyboard.createCursorKeys();
+            this.physics.arcade.enable(this.bot);
 
-    game.input.onDown.addOnce(changeMummy, this);
-    cursors = game.input.keyboard.createCursorKeys();
-    game.physics.arcade.enable(bot);
+        },
 
-}
-
-function changeMummy() {
-
-    bot.loadTexture('mummy', 0);
-
-    bot.animations.add('walk');
-
-    bot.animations.play('walk', 30, true);
-
-}
+        changeMummy: function() {
+            this.bot.loadTexture('mummy', 0);
+            this.bot.animations.add('walk');
+            this.bot.animations.play('walk', 30, true);
+        },
 
                 
-function update(){
-    bot.body.velocity.x = 0;
-    if (cursors.left.isDown)
-    {
-        //  Move to the left
-        bot.body.velocity.x = -150;
+        update: function(){
+            this.bot.body.velocity.x = 0;
+            if (cursors.left.isDown)
+            {
+                //  Move to the left
+                this.bot.body.velocity.x = -150;
 
-        bot.animations.play('run');
-    }
-     else if (cursors.right.isDown)
-    {
-        //  Move to the right
-        bot.body.velocity.x = 150;
+                this.bot.animations.play('run');
+            }
+             else if (cursors.right.isDown)
+            {
+                //  Move to the right
+                this.bot.body.velocity.x = 150;
 
-        bot.animations.play('run');
-    }
-    else
-    {
-        //  Stand still
-        bot.animations.stop();
+                this.bot.animations.play('run');
+            }
+            else
+            {
+                //  Stand still
+                this.bot.animations.stop();
 
-        bot.frame = 4;
-    }
-    
-}
+                this.bot.frame = 4;
+            }
+
+        }
         
 //function render() {
 //
@@ -77,3 +67,6 @@ function update(){
 //}
 
     };
+    game.state.add("PlayGame", playGame);
+    game.state.start("PlayGame");
+};
