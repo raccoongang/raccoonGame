@@ -142,6 +142,10 @@ window.onload = function () {
             this.bullets.setAll('checkWorldBounds', true);
 
             this.is_washing = false;
+            this.score = 0;
+            var style = { font: "32px Arial", fill: "#ff0044", align: "center", };
+            this.score_text = game.add.text(20, 20, "Score: "+this.score, style);
+            
             this.drawLives(); 
                         
             var initMessage = this.composeInitMessage();    
@@ -491,6 +495,9 @@ window.onload = function () {
 
         processHandlerRaccoon: function (raccoon, cloth) {
             if (this.raccoon.positionY == cloth.line && !cloth.isEnemy) {
+                this.score++;
+                this.score_text.text = "Score: "+this.score;
+                this.clothVelocity += this.score % 3;
                 cloth.line = 100;
                 var splash = this.clothesGroup.create(cloth.body.x, cloth.body.y, 'splash');
                 splash.scale.x = 1.2;
@@ -510,11 +517,13 @@ window.onload = function () {
                 }
                 this.drawRaccoon();
                 this.is_washing = true;
-                game.add.tween(this.raccoon).to({angle: -30}, 50, 'Linear', true, 0, 5, true);
+                var tween = game.add.tween(this.raccoon).to({angle: -30}, 50, 'Linear', true, 0, 5, true);
+                tween.onComplete.add(function () { 
+                        game.add.tween(this.raccoon).to({angle: 0}, 5, 'Linear', true, 0);
+                }, this);
                 setTimeout(function () {
                     this.is_washing = false;
                     game.add.tween(cloth).to({x: 10, y: 650}, 1000, 'Linear', true, 0);
-                    this.raccoon.angle = 0;
                     splash.kill();
                 }.bind(this), 300);
 
@@ -545,7 +554,10 @@ window.onload = function () {
                 }
                 this.drawEnemy();
                 this.is_washing = true;
-                game.add.tween(this.enemy).to({angle: -30}, 50, 'Linear', true, 0, 5, true);
+                var tween = game.add.tween(this.enemy).to({angle: -30}, 50, 'Linear', true, 0, 5, true);
+                tween.onComplete.add(function () {
+                        game.add.tween(this.enemy).to({angle: 0}, 5, 'Linear', true, 0);
+                }, this);
                 setTimeout(function () {
                     this.is_washing = false;
                     game.add.tween(cloth).to({x: 10, y: 650}, 1000, 'Linear', true, 0);
@@ -640,7 +652,8 @@ window.onload = function () {
 
         resetBullet: function (bullet) {
             bullet.kill();
-        }
+        },
+        
 
 //function render() {
 //
