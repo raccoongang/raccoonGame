@@ -134,8 +134,7 @@ window.onload = function () {
                         enemy.body.collideWorldBounds = true;
                         enemy.scale.x = 0.1;
                         enemy.scale.y = 0.1;
-                        enemy.positionX = 0;
-                        enemy.positionY = 3;
+                        enemy.id = data.id;
 
                         // Draw stumps
                         var invertedStumps = [];
@@ -151,8 +150,11 @@ window.onload = function () {
                         this.drawEnemyStumps(invertedStumps);
                         sock.send(initMessage);
                     }
-                    else if (data.id !== id) {
-                        console.log(JSON.parse(message.data));
+                    else if (data.id !== id && enemy !== undefined) {
+                        enemy.positionX = data.x;
+                        enemy.positionY = data.y;
+                        enemy.state = data.state;
+                        this.drawEnemy(enemy);
                     }
 
                 }.bind(this);
@@ -385,6 +387,7 @@ window.onload = function () {
             enemy.body.x = enemyStartX + enemy.positionX * enemyStepX + leftCorrect + upCorrect;
             console.log(enemy.state);
             console.log(enemyStartY + enemy.positionY * enemyStepY);
+            console.log('Draw');
             enemy.body.y = enemyStartY + enemy.positionY * enemyStepY;
         }
         ,
@@ -439,7 +442,8 @@ window.onload = function () {
             var pos = JSON.stringify({
                 id: id,
                 x: object.positionX,
-                y: object.positionY
+                y: object.positionY,
+                state: this.raccoon.state
             });
             return pos;
         }
