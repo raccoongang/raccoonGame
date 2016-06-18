@@ -366,7 +366,7 @@
         
         getPos: function(object) {
             var pos = JSON.stringify({
-                id: id,
+                _id: _id,
                 x: object.positionX,
                 y: object.positionY
             });

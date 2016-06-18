@@ -30,6 +30,16 @@ def room(message):
     return message
 
 
+def remove_from_room(message):
+    message = json.loads(message)
+    _id = message.get('_id')
+    global_pull_users.pop(_id)
+    global_pull_users[global_pull_users.get(_id, '')] = ''
+    message['pare'] = ''
+    message = json.dumps(message)
+    return message
+
+
 @asyncio.coroutine
 async def handler(websocket, path):
     global connected
@@ -40,8 +50,12 @@ async def handler(websocket, path):
             message = room(await websocket.recv())
             await asyncio.wait([ws.send(message) for ws in connected])
         except ConnectionClosed as e:
+            remove_from_room(message)
+            # for x in xrange(1,10):
+            # 	connection_closed
             print(e)
             print(dir(e))
+            print(dir(list(connected)[0]))
             break
 
 start_server = websockets.serve(handler, '127.0.0.1', 5678)
