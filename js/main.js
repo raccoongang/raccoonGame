@@ -151,7 +151,7 @@ window.onload = function () {
                 this.sock.onmessage = function (message) {
                     var data = JSON.parse(message.data);
                     if (data.type == 'init' && data.id !== id && this.enemy == undefined) {
-                        console.log('start');
+                        console.log('<<<<<<>>>>>>>>>start');
                         console.log(data);
                         this.enemy = game.add.sprite(enemyStartX, enemyStartY - 3 * enemyStepY + enemyStumpIndent[0], 'raccoon_front', 0);
                         this.enemyBucket = game.add.sprite(1100, 210, 'bucket', 0);
@@ -179,16 +179,16 @@ window.onload = function () {
                         this.drawEnemyLives();
                         this.sock._send(initMessage);
                     }
-                    if (data.type == 'fiber' && data.id !== id && this.enemy !== undefined) {
+                    if (data.type == 'fiber' && data.id !== id && this.enemy !== undefined && data.id == this.enemy.id) {
                         console.log(data);
                         this.goEnemyFiber(data.line, data.velocity);
                     }
-                    if (data.type == 'lives' && data.id !== id && this.enemy !== undefined) {
+                    if (data.type == 'lives' && data.id !== id && this.enemy !== undefined && data.id == this.enemy.id) {
                         console.log(data);
                         this.enemy.raccoonLives = data.lives;
                         this.drawEnemyLives();
                     }
-                    if (data.type == 'update' && data.id !== id && this.enemy !== undefined) {
+                    if (data.type == 'update' && data.id !== id && this.enemy !== undefined && data.id == this.enemy.id) {
                         console.log(id, data.id);
                         console.log('>>>>>>>', data.x, data.y);
                         this.enemy.positionX = data.x;
