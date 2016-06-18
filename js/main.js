@@ -33,8 +33,9 @@ window.onload = function () {
     var enemyStepX = 86;
     var enemyStepY = 53;
 
-    var stumpIndent = [0, 8, 16, 24, 24, 16, 8, 0]
-    var enemyStumpIndent = [0, -8, -16, -24, -24, -16, -8, 0]
+    var stumpIndent = [0, 8, 16, 24, 24, 16, 8, 0];
+    var fireIndent = [185, 140, 64, 0, 0, -12, -20, -45];
+    var enemyStumpIndent = [0, -8, -16, -24, -24, -16, -8, 0];
 
 
     var clothesGroup;
@@ -675,11 +676,13 @@ window.onload = function () {
                 if (bullet) {
                     var leftCorrect = this.raccoon.state == 'right' ? 80 : 0;
                     var upCorrect = this.raccoon.state == 'up' || this.raccoon.state == 'down' ? 55 : 0;
+                    this.raccoon.state = 'up';
+                    this.raccoon.loadTexture('raccoon_front', 1);
+                    this.drawRaccoon();
                     bullet.scale.x = 0.4;
                     bullet.scale.y = 0.4;
                     bullet.reset(this.raccoon.body.x + leftCorrect + upCorrect, this.raccoon.body.y);
                     bullet.body.velocity.y = 0;
-                    //bulletTime = game.time.now + 80;
                     bullet.anchor.setTo(0.5, 0.5);
                     game.add.tween(bullet).to(
                         {angle: 360},
@@ -693,9 +696,9 @@ window.onload = function () {
                         Phaser.Easing.Linear.None,
                         true
                     );
-                    var x_offset = 0;
+                    var x_offset = fireIndent[this.raccoon.positionX];
                     var tween = game.add.tween(bullet).to(
-                        {y: 255},
+                        {y: 235, x: this.raccoon.x + x_offset},
                         bullet_velocity + (this.raccoon.positionY * (bullet_velocity / this.raccoon.positionY ? this.raccoon.positionY : 1)),
                         Phaser.Easing.Linear.None,
                         true
