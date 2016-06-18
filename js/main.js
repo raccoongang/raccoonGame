@@ -67,6 +67,7 @@
             game.load.spritesheet('splash', '/assets/splash.png'); 
             game.load.spritesheet('bucket', '/assets/bucket.png'); 
             game.load.spritesheet('wet_fiber', '/assets/wet_fiber.png'); 
+            game.load.spritesheet('waves', '/assets/waves.png'); 
              
             this.isUp = true;
 //           game.load.atlasJSONHash('bot', '/assets/running_bot.png', '/assets/running_bot.json');
@@ -83,11 +84,14 @@
             
           
             game.add.sprite(0, 0, 'landscape'); 
+            this.waves = game.add.sprite(-300, 330, 'waves'); 
             this.bucket = game.add.sprite(10, 650, 'bucket');
+            game.add.tween(this.waves).to({x:1000}, 100000, 'Linear', true, 0, -1); 
             this.bucket.scale.x = 0.2;
             this.bucket.scale.y = 0.2; 
             this.physics.arcade.enable(this.bucket); 
             this.clothesGroup = game.add.physicsGroup(); 
+            this.enemyGroup = game.add.physicsGroup();  
             this.drawStumps(this.stumpsArray); 
             this.raccoon = game.add.sprite(raccoonStartX, raccoonStartY+3*raccoonStepY, 'raccoon_side', 0);
             this.raccoon.state = 'right' 
@@ -103,6 +107,7 @@
 
             var initMessage = this.composeInitMessage();
 
+<<<<<<< Updated upstream
             if (sock !== undefined) {
                 sock.send(initMessage);
 
@@ -127,6 +132,30 @@
                             else {
                                 invertedStumps.push(data.stumps[i]);
                             }
+=======
+            sock.send(initMessage);
+
+            sock.onmessage = function(message) {
+                var data = JSON.parse(message.data);
+
+                if (data.type == 'init' && data.id !== id && enemy == undefined) {
+                    enemy = this.enemyGroup.create(enemyStartX+enemyStepX, enemyStartY+3*enemyStepY, 'raccoon_front', 0);
+                    this.physics.arcade.enable(enemy);
+                    enemy.body.collideWorldBounds = true;
+                    enemy.scale.x = 0.1;
+                    enemy.scale.y = 0.1;
+                    enemy.positionX = 0;
+                    enemy.positionY = 3;
+
+                    // Draw stumps
+                    var invertedStumps = [];
+                    for (i = data.stumps.length; i >= 0; i--) {
+                        if (invertedStumps[0] == undefined) {
+                            invertedStumps[0] = data.stumps[i];
+                        }
+                        else {
+                            invertedStumps.push(data.stumps[i]);
+>>>>>>> Stashed changes
                         }
                         this.drawEnemyStumps(invertedStumps);
                         sock.send(initMessage);
@@ -261,7 +290,7 @@
             for (var i=0; i < stumpsArray.length; i++){
                 for (var j=0; j < 3; j++ ){
                     if (stumpsArray[i][j] == 1){
-                    var stump = game.add.image(enemyStumpStartX + i * (enemyStumpSizeX + enemyStumpSpaceX), enemyStumpStartY + j * (enemyStumpSizeY + enemyStumpSpaceY) + enemyStumpIndent[i], "stump");
+                    var stump = this.enemyGroup.create(enemyStumpStartX + i * (enemyStumpSizeX + enemyStumpSpaceX), enemyStumpStartY + j * (enemyStumpSizeY + enemyStumpSpaceY) + enemyStumpIndent[i], "stump");
                     stump.scale.x = 0.5;
                     stump.scale.y = 0.5;
                     }
