@@ -13,6 +13,7 @@ window.onload = function () {
     var myRaccoonStumpStartX = 150;
     var myRaccoonStumpStartY = 440;
 
+    var bulletTime = 0
 
     var enemyStumpSizeX = 81;
     var enemyStumpSizeY = 36;
@@ -52,10 +53,9 @@ window.onload = function () {
 
 
     var _id = localStorage.getItem('_id');
-    if (_id == null) {
-        _id = localStorage.setItem('_id', new String(IP + new Date()).hashCode());
-    }
-    ;
+    //if (_id == null) {
+    //    _id = localStorage.setItem('_id', new String(IP + new Date()).hashCode());
+    //}
 
     playGame.prototype = {
 
@@ -485,12 +485,11 @@ window.onload = function () {
                         tween.delay(0);
                     }, this);
                     tween.onComplete.add(function () {
-                        tween.pause();
+                        this.resetBullet(bullet);
                     }, this);
                 }
             }
-        }
-        ,
+        },
 
         resetBullet: function (bullet) {
             bullet.kill();
