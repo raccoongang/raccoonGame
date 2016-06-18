@@ -377,7 +377,8 @@ window.onload = function () {
               var oneLive = this.livesGroup.create(550 - 50*i, 750, 'live');
               oneLive.scale.x = 0.3;
               oneLive.scale.y = 0.3;
-          }  
+          }
+          this.sock.send();
         },
         
        drawEnemyLives: function(){
@@ -626,6 +627,15 @@ window.onload = function () {
                 velocity: velocity,
             });
             return fiberMessage;
+        },
+        
+        composeLives: function (lives) {
+            var livesMessage = JSON.stringify({
+                id: id,
+                type: 'lives',
+                lives: lives
+            });
+            return livesMessage;
         },
 
         throwClothes: function () {
