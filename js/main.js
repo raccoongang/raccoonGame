@@ -151,6 +151,10 @@ window.onload = function () {
                         this.drawEnemyStumps(data.stumps);
                         this.sock.send(initMessage);
                     }
+                    if (data.type == 'fiber' && data.id !== id && this.enemy !== undefined) {
+                        console.log(data);
+                        this.goEnemyFiber(data.line, data.velocity);
+                    }
                     else if (data.id !== id && this.enemy !== undefined) {
                         console.log(id, data.id);
                         this.enemy.positionX = data.x;
@@ -424,8 +428,20 @@ window.onload = function () {
             cloth.scale.x = 0.3;
             cloth.scale.y = 0.3;
             cloth.body.velocity.x = this.clothVelocity;
-        }
-        ,
+            this.sock.send(this.composeFiber(cloth.line, this.clothVelocity));
+        },
+        
+        goEnemyFiber: function (line, velocity) {
+            var clothType = Math.floor((Math.random() * 5) + 1)
+            var cloth = this.clothesGroup.create(-50, 390 - (enemyStumpSizeY + 12)*line, 'clothes', clothType);
+            cloth.line = 2 - line;
+            this.physics.arcade.enable(cloth);
+            cloth.scale.x = 0.2;
+            cloth.scale.y = 0.2;
+            cloth.body.velocity.x = velocity;
+            cloth.isEnemy = true;
+            console.log('fiber', cloth.line, cloth.body.velocity.x);
+        },
 
         drawRaccoon: function () {
             var leftCorrect = this.raccoon.state == 'left' ? 70 : 0;
@@ -523,8 +539,17 @@ window.onload = function () {
                 stumps: this.stumpsArray
             });
             return initMessage;
-        }
-        ,
+        },
+        
+        composeFiber: function (line, velocity) {
+            var fiberMessage = JSON.stringify({
+                id: id,
+                type: 'fiber',
+                line: line,
+                velocity: velocity,
+            });
+            return fiberMessage;
+        },
 
         throwClothes: function () {
             if (game.time.now > bulletTime) {
