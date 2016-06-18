@@ -670,15 +670,15 @@ window.onload = function () {
 
         throwClothes: function (enemy_fire) {
             if (game.time.now > bulletTime) {
+                this.raccoon.state = 'up';
+                this.raccoon.loadTexture('raccoon_front', 1);
+                this.drawRaccoon();
                 var bullet = this.bullets.getFirstExists(false);
                 var bullet_velocity = 600;
 
                 if (bullet) {
                     var leftCorrect = this.raccoon.state == 'right' ? 80 : 0;
                     var upCorrect = this.raccoon.state == 'up' || this.raccoon.state == 'down' ? 55 : 0;
-                    this.raccoon.state = 'up';
-                    this.raccoon.loadTexture('raccoon_front', 1);
-                    this.drawRaccoon();
                     bullet.scale.x = 0.4;
                     bullet.scale.y = 0.4;
                     bullet.reset(this.raccoon.body.x + leftCorrect + upCorrect, this.raccoon.body.y);
