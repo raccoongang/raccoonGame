@@ -54,7 +54,7 @@ window.onload = function () {
             game.load.spritesheet('landscape', '/assets/landscape.jpg');
             game.load.spritesheet('raccoon_side', '/assets/raccoon_side.png', 510, 509);
             game.load.spritesheet('raccoon_front', '/assets/raccoon_front.png', 465, 511);
-            game.load.spritesheet('raccoon_bang', '/assets/raccoon_bang.png');
+            game.load.spritesheet('explosion', '/assets/explosion.png');
             game.load.spritesheet('clothes', '/assets/clothes.png', 226, 212);
             game.load.spritesheet('stump', '/assets/stump.png');
             game.load.spritesheet('splash', '/assets/splash_Sprites.png', 64, 64);
@@ -709,8 +709,6 @@ window.onload = function () {
                     tween.onComplete.add(function () {
                         this.resetBullet(bullet);
                     }, this);
-
-                    this.sendToWS(this.composeFire());
                 }
             }
         },
@@ -721,8 +719,27 @@ window.onload = function () {
 
         fireCollision: function(){
             this.enemy.state = 'up';
-            this.raccoon.loadTexture('raccoon_bang', 0);
-            this.drawEnemy();
+            this.enemy.loadTexture('raccoon_front', 0);
+            var explosion = game.add.sprite(this.enemy.x, this.enemy.y, 'explosion');
+            explosion.scale.x = 0.1;
+            explosion.scale.y = 0.1;
+            explosion.anchor.setTo(0.5, 0.5);
+
+            this.sendToWS(this.composeFire());
+
+            var tween = game.add.tween(explosion.scale).to(
+                {y: 1, x: 1},
+                500,
+                Phaser.Easing.Linear.None,
+                true
+            );
+
+            tween.onStart.add(function () {
+                tween.delay(0);
+            }, this);
+            tween.onComplete.add(function () {
+                explosion.kill();
+            }, this);
         }
         
 
