@@ -721,8 +721,9 @@ window.onload = function () {
 
         fireCollision: function(){
             this.enemy.state = 'up';
-            this.raccoon.loadTexture('raccoon_bang', 0);
+            this.enemy.loadTexture('raccoon_bang', 0);
             this.drawEnemy();
+            return false;
         }
         
 
