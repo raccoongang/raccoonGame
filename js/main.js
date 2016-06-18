@@ -17,10 +17,10 @@ window.onload = function () {
 
     var enemyStumpSizeX = 81;
     var enemyStumpSizeY = 36;
-    var enemyStumpSpaceX = 7;
+    var enemyStumpSpaceX = 6;
     var enemyStumpSpaceY = 12;
     var enemyStumpStartX = 260;
-    var enemyStumpStartY = 300;
+    var enemyStumpStartY = 390;
 
 
     var raccoonStartX = 100;
@@ -30,7 +30,7 @@ window.onload = function () {
     var stumpIndent = [0, 8, 16, 24, 24, 16, 8, 0]
 
     var enemyStartX = 170;
-    var enemyStartY = 30;
+    var enemyStartY = 390;
     var enemyStepX = 90;
     var enemyStepY = 60;
 
@@ -127,25 +127,24 @@ window.onload = function () {
                     if (data.type == 'init' && data.id !== id && this.enemy == undefined) {
                         console.log('start');
                         console.log(data);
-                        this.enemy = game.add.sprite(enemyStartX + enemyStepX, enemyStartY + 3 * enemyStepY, 'raccoon_front', 0);
-                        this.enemy
+                        this.enemy = game.add.sprite(enemyStartX + enemyStepX, enemyStartY - 3 * enemyStepY, 'raccoon_front', 0);
                         this.physics.arcade.enable(this.enemy);
                         this.enemy.body.collideWorldBounds = true;
                         this.enemy.scale.x = 0.1;
                         this.enemy.scale.y = 0.1;
                         this.enemy.id = data.id;
                         // Draw stumps
-                        var invertedStumps = [];
-                        for (i = data.stumps.length; i >= 0; i--) {
-                            if (invertedStumps[0] == undefined) {
-                                invertedStumps[0] = data.stumps[i];
-                            }
-                            else {
-                                invertedStumps.push(data.stumps[i]);
-                            }
-
-                        }
-                        this.drawEnemyStumps(invertedStumps);
+//                        var invertedStumps = [];
+//                        for (i = data.stumps.length; i >= 0; i--) {
+//                            if (invertedStumps[0] == undefined) {
+//                                invertedStumps[0] = data.stumps[i];
+//                            }
+//                            else {
+//                                invertedStumps.push(data.stumps[i]);
+//                            }
+//
+//                        }
+                        this.drawEnemyStumps(data.stumps);
                         this.sock.send(initMessage);
                     }
                     else if (data.id !== id && this.enemy !== undefined) {
@@ -153,7 +152,20 @@ window.onload = function () {
                         this.enemy.positionX = data.x;
                         this.enemy.positionY = data.y;
                         this.enemy.state = data.state;
+                        if (data.state == 'right') {
+                            this.enemy.loadTexture('raccoon_side', 0);
+                        }
+                        else if (data.state == 'left') {
+                            this.enemy.loadTexture('raccoon_side', 1);
+                        }
+                        else if (data.state == 'down') {
+                            this.enemy.loadTexture('raccoon_front', 1);
+                        }
+                        else if (data.state == 'up') {
+                            this.enemy.loadTexture('raccoon_front', 0);
+                        }
                         console.log('update ', this.enemy);
+                        console.log(data.x, data.y);
 
                         this.drawEnemy();
                     }
@@ -311,7 +323,7 @@ window.onload = function () {
             for (var i = 0; i < stumpsArray.length; i++) {
                 for (var j = 0; j < 3; j++) {
                     if (stumpsArray[i][j] == 1) {
-                        var stump = this.enemyGroup.create(enemyStumpStartX + i * (enemyStumpSizeX + enemyStumpSpaceX), enemyStumpStartY + j * (enemyStumpSizeY + enemyStumpSpaceY) + enemyStumpIndent[i], "stump");
+                        var stump = this.enemyGroup.create(enemyStumpStartX + i * (enemyStumpSizeX + enemyStumpSpaceX), enemyStumpStartY - j * (enemyStumpSizeY + enemyStumpSpaceY) + enemyStumpIndent[i], "stump");
                         stump.scale.x = 0.5;
                         stump.scale.y = 0.5;
                     }
@@ -412,8 +424,8 @@ window.onload = function () {
             this.enemy.body.x = enemyStartX + this.enemy.positionX * enemyStepX + leftCorrect + upCorrect;
             this.enemy.x = enemyStartX + this.enemy.positionX * enemyStepX + leftCorrect + upCorrect;
             
-            this.enemy.body.y = enemyStartY + this.enemy.positionY * enemyStepY;
-            this.enemy.y = enemyStartY + this.enemy.positionY * enemyStepY;
+            this.enemy.body.y = enemyStartY - this.enemy.positionY * enemyStepY;
+            this.enemy.y = enemyStartY - this.enemy.positionY * enemyStepY;
         }
         ,
 
