@@ -19,10 +19,10 @@ window.onload = function () {
         raccoonSizeX = 756,
         raccoonSizeY = 516,
         
-        enemyStumpSizeX = 81,
-        enemyStumpSizeY = 36,
-        enemyStumpSpaceX = 6,
-        enemyStumpSpaceY = 12,
+        enemyStumpSizeX = 51,
+        enemyStumpSizeY = 26,
+        enemyStumpSpaceX = 36,
+        enemyStumpSpaceY = 22,
         enemyStumpStartX = 260,
         enemyStumpStartY = 390,
         
@@ -68,8 +68,9 @@ window.onload = function () {
             game.load.spritesheet('sign', '/assets/sign.png');
 
             try {
-                this.sock = new WebSocket("ws://" + ip + ":5678/ws");
-
+//                this.sock = new WebSocket("ws://" + ip + ":5678/ws");
+                this.sock = new WebSocket("ws://0b4aee7f.ngrok.io/ws");    
+    
                 var self = this;
 
                 this.waitForConnection = function (callback, interval) {
@@ -164,7 +165,7 @@ window.onload = function () {
                     if (data.type == 'init' && data.id !== id && this.enemy == undefined) {
                         console.log('<<<<<<>>>>>>>>>start');
                         console.log(data);
-                        this.enemy = game.add.sprite(enemyStartX, enemyStartY - 3 * enemyStepY + enemyStumpIndent[0], 'raccoon_front', 0);
+                        this.enemy = game.add.sprite(enemyStartX, enemyStartY - 3 * enemyStepY + enemyStumpIndent[0], 'raccoon', 3);
                         this.enemyBucket = game.add.sprite(1100, 210, 'bucket', 0);
                         this.physics.arcade.enable(this.enemy);
                         this.physics.arcade.enable(this.enemyBucket);
@@ -661,14 +662,13 @@ window.onload = function () {
             console.log("throw clothes");
             if (game.time.now > bulletTime) {
                 this.raccoon.state = 'up';
-                this.raccoon.loadTexture('raccoon_front', 1);
+                this.raccoon.loadTexture('raccoon', 3);
                 this.drawRaccoon();
                 var bullet = this.bullets.getFirstExists(false);
                 var bullet_velocity = 600;
 
                 if (bullet) {
                     var leftCorrect = this.raccoon.state == 'right' ? 80 : 0;
-                    var upCorrect = this.raccoon.state == 'up' || this.raccoon.state == 'down' ? 55 : 0;
                     bullet.scale.x = 0.4;
                     bullet.scale.y = 0.4;
                     bullet.reset(this.raccoon.x + leftCorrect + upCorrect, this.raccoon.body.y);
@@ -709,7 +709,7 @@ window.onload = function () {
         fireCollision: function(){
             console.log("fire callback");
             this.enemy.state = 'up';
-            this.enemy.loadTexture('raccoon_front', 0);
+            this.enemy.loadTexture('raccoon', 2);
             var explosion = game.add.sprite(this.enemy.x, this.enemy.y, 'explosion');
             explosion.scale.x = 0.1;
             explosion.scale.y = 0.1;
