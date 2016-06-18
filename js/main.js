@@ -41,13 +41,7 @@ window.onload = function () {
     var clothesGroup;
 
     var ip = "192.168.0.109";
-    try {
-        var sock = new WebSocket("ws://" + ip + ":5678/ws");
-    }
-    catch (err) {
-        console.log("Якась ... з вашими сокетами.");
-        var sock;
-    }
+
 
 
     var _id = localStorage.getItem('_id');
@@ -68,7 +62,13 @@ window.onload = function () {
             game.load.spritesheet('wet_fiber', '/assets/wet_fiber.png');
             game.load.spritesheet('waves', '/assets/waves.png');
             game.load.spritesheet('live', '/assets/live_logo.png');
-
+            try {
+                this.sock = new WebSocket("ws://" + ip + ":5678/ws");
+            }
+            catch (err) {
+                console.log("Якась ... з вашими сокетами.");
+                this.sock = undefined;
+            }
             this.isUp = true;
 //           game.load.atlasJSONHash('bot', '/assets/running_bot.png', '/assets/running_bot.json');
 //            game.load.spritesheet('mummy', '/assets/metalslug_mummy37x45.png', 37, 45, 18);
@@ -116,23 +116,22 @@ window.onload = function () {
 
             this.is_washing = false;
             this.drawLives();    
-            var initMessage = this.composeInitMessage();
+            
+            var initMessage = this.composeInitMessage();    
+            if (this.sock !== undefined) {
+                this.sock.send(initMessage);
 
-            if (sock !== undefined) {
-                sock.send(initMessage);
-
-                sock.onmessage = function (message) {
-                    console.log(this);
+                this.sock.onmessage = function (message) {
                     var data = JSON.parse(message.data);
                     if (data.type == 'init' && data.id !== id && this.enemy == undefined) {
                         console.log('start');
                         this.enemy = game.add.sprite(enemyStartX + enemyStepX, enemyStartY + 3 * enemyStepY, 'raccoon_front', 0);
+                        this.enemy
                         this.physics.arcade.enable(this.enemy);
                         this.enemy.body.collideWorldBounds = true;
                         this.enemy.scale.x = 0.1;
                         this.enemy.scale.y = 0.1;
                         this.enemy.id = data.id;
-
                         // Draw stumps
                         var invertedStumps = [];
                         for (i = data.stumps.length; i >= 0; i--) {
@@ -145,7 +144,7 @@ window.onload = function () {
 
                         }
                         this.drawEnemyStumps(invertedStumps);
-                        sock.send(initMessage);
+                        this.sock.send(initMessage);
                     }
                     else if (data.id !== id && this.enemy !== undefined) {
                         this.enemy.positionX = data.x;
@@ -322,7 +321,6 @@ window.onload = function () {
           this.livesGroup.forEach(function(live){
               live.kill();
           });
-            console.log(this.rsccoonLives);
           for(var i=1; i<=this.rsccoonLives; i++){
               var oneLive = this.livesGroup.create(550 - 50*i, 750, 'live');
               oneLive.scale.x = 0.3;
@@ -472,8 +470,8 @@ window.onload = function () {
         },
 
         sendToWS: function (pos) {
-            if (sock !== undefined) {
-                sock.send(pos);
+            if (this.sock !== undefined) {
+                this.sock.send(pos);
             }
         },
 
