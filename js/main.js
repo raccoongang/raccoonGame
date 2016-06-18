@@ -57,7 +57,6 @@ window.onload = function () {
             game.load.spritesheet('raccoon_front', '/assets/raccoon_front.png', 465, 511)
             game.load.spritesheet('clothes', '/assets/clothes.png', 226, 212);
             game.load.spritesheet('stump', '/assets/stump.png');
-            // game.load.spritesheet('splash', '/assets/splash.png');
             game.load.spritesheet('splash', '/assets/splash_Sprites.png', 64, 64);
             game.load.spritesheet('bucket', '/assets/bucket.png');
             game.load.spritesheet('wet_fiber', '/assets/wet_fiber.png');
@@ -622,12 +621,24 @@ window.onload = function () {
                     bullet.body.velocity.y = 0;
                     bulletTime = game.time.now + 80;
                     bullet.anchor.setTo(0.5, 0.5);
-                    game.add.tween(bullet).to({angle: 360}, 200 + (this.raccoon.positionY * 400), Phaser.Easing.Cubic.In, true);
-                    game.add.tween(bullet.scale).to({
-                        x: 0.1,
-                        y: 0.1
-                    }, 200 + (this.raccoon.positionY * 400), Phaser.Easing.Linear.None, true);
-                    var tween = game.add.tween(bullet).to({y: 255}, 2000 - (this.raccoon.positionY * 400), Phaser.Easing.Linear.None, true);
+                    game.add.tween(bullet).to(
+                        {angle: 360},
+                        300 + (this.raccoon.positionY * (600/this.raccoon.positionY?this.raccoon.positionY:1)),
+                        Phaser.Easing.Cubic.In,
+                        true
+                    );
+                    game.add.tween(bullet.scale).to(
+                        {x: 0.1, y: 0.1},
+                        500 + (this.raccoon.positionY * (600/this.raccoon.positionY?this.raccoon.positionY:1)),
+                        Phaser.Easing.Linear.None,
+                        true
+                    );
+                    var tween = game.add.tween(bullet).to(
+                        {y: 255},
+                        500 + (this.raccoon.positionY * (600/this.raccoon.positionY?this.raccoon.positionY:1)),
+                        Phaser.Easing.Linear.None,
+                        true
+                    );
                     tween.onStart.add(function () {
                         tween.delay(0);
                     }, this);
