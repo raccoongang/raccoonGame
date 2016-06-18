@@ -36,8 +36,11 @@
             game.load.spritesheet('raccoon_front', '/assets/raccoon_front.png', 465, 511) 
             game.load.spritesheet('clothes', '/assets/clothes.png', 226, 212);
             game.load.spritesheet('stump', '/assets/stump.png');
+            game.load.spritesheet('splash', '/assets/splash.png'); 
+            game.load.spritesheet('bucket', '/assets/bucket.png'); 
+            game.load.spritesheet('wet_fiber', '/assets/wet_fiber.png'); 
              
-            this.isUp = true;this.isDown = true;this.isLeft = true;this.isRight = true;
+            this.isUp = true;
 //           game.load.atlasJSONHash('bot', '/assets/running_bot.png', '/assets/running_bot.json');
 //            game.load.spritesheet('mummy', '/assets/metalslug_mummy37x45.png', 37, 45, 18);
         },
@@ -52,19 +55,23 @@
             
           
             game.add.sprite(0, 0, 'landscape'); 
+            this.bucket = game.add.sprite(10, 650, 'bucket');
+            this.bucket.scale.x = 0.2;
+            this.bucket.scale.y = 0.2; 
+            this.physics.arcade.enable(this.bucket); 
             this.clothesGroup = game.add.physicsGroup(); 
-//            this.clothesGroup.addAt(game.add.physicsGroup, 0);
-//            this.clothesGroup.addAt(game.add.physicsGroup, 1);
-//            this.clothesGroup.addAt(game.add.physicsGroup, 2);
             this.drawStumps(this.stumpsArray); 
             this.raccoon = game.add.sprite(raccoonStartX, raccoonStartY+3*raccoonStepY, 'raccoon_side', 0);
             this.raccoon.state = 'right' 
             this.physics.arcade.enable(this.raccoon);
+             
             this.raccoon.body.collideWorldBounds = true;
             this.raccoon.scale.x = 0.3; 
             this.raccoon.scale.y = 0.3; 
             this.raccoon.positionX = 0;
             this.raccoon.positionY = 3; 
+             
+            this.is_washing = false; 
 
             var pos = this.getPos(this.raccoon);
 
@@ -86,73 +93,79 @@
         },
 
         update: function(){
-            if (cursors.left.isDown && this.isLeft)
-            {
-                if (this.raccoon.state != 'left'){
-                    this.raccoon.state = 'left';
-                    this.raccoon.loadTexture('raccoon_side', 1);
+            game.physics.arcade.collide(this.raccoon, this.clothesGroup, this.collisionHandler, this.processHandlerRaccoon, this);
+            game.physics.arcade.collide(this.bucket, this.clothesGroup, this.collisionHandler, this.processHandlerBucket, this);
+            if (!this.is_washing){
+                if (cursors.left.isDown && this.isUp)
+                {
+                    if (this.raccoon.state != 'left'){
+                        this.raccoon.state = 'left';
+                        this.raccoon.loadTexture('raccoon_side', 1);
+                    }
+                    else {
+                        this.raccoon.positionX -= this.canGoToDirection('left');
+                    }
+                    this.drawRaccoon();
+                    this.isUp = false; 
+                    setTimeout(function() {this.isUp = true;}.bind(this), 200);
                 }
-                else {
-                    this.raccoon.positionX -= this.canGoToDirection('left');
+                 else if (cursors.right.isDown && this.isUp)
+                {
+                    if (this.raccoon.state != 'right'){
+                        this.raccoon.loadTexture('raccoon_side', 0);
+                        this.raccoon.state = 'right';
+                    }    
+                    else {
+                        this.raccoon.positionX += this.canGoToDirection('right');
+                    }
+                    this.drawRaccoon();
+                    this.isUp = false; 
+                    setTimeout(function() { this.isUp = true; }.bind(this), 200);
+                    this.sendToWS(this.getPos(this.raccoon));
+    //                this.raccoon.animations.play('run');
                 }
-                this.drawRaccoon();
-                this.isLeft = false; 
-            }
-             else if (cursors.right.isDown && this.isRight)
-            {
-                if (this.raccoon.state != 'right'){
-                    this.raccoon.loadTexture('raccoon_side', 0);
-                    this.raccoon.state = 'right';
-                }    
-                else {
-                    this.raccoon.positionX += this.canGoToDirection('right');
+
+                else if (cursors.up.isDown && this.isUp)
+                {
+                  if (this.raccoon.state != 'up'){
+                      this.raccoon.loadTexture('raccoon_front', 1);
+                      this.raccoon.state = 'up';
+                  }
+                  else {
+                      this.raccoon.positionY -= this.canGoToDirection('up');
+                  }
+                  this.drawRaccoon();    
+                    this.isUp = false; 
+                    setTimeout(function() { this.isUp = true; }.bind(this), 200);       
                 }
-                this.drawRaccoon();
-                this.isRight = false; 
-                this.sendToWS(this.getPos(this.raccoon));
-//                this.raccoon.animations.play('run');
+
+                else if (cursors.down.isDown && this.isUp)
+                {
+                  this.goFiber();
+                  if (this.raccoon.state != 'down'){
+                      this.raccoon.loadTexture('raccoon_front', 0);
+                      this.raccoon.state = 'down';
+                  }
+                  else {
+                      this.raccoon.positionY += this.canGoToDirection('down');
+                  }
+                  this.drawRaccoon();
+                    this.isUp = false; 
+                    setTimeout(function() { this.isUp = true; }.bind(this), 200);        
+                  this.sendToWS(this.getPos(this.raccoon));
+                }
             }
-            
-            else if (cursors.up.isDown && this.isUp)
-            {
-              if (this.raccoon.state != 'up'){
-                  this.raccoon.loadTexture('raccoon_front', 1);
-                  this.raccoon.state = 'up';
-              }
-              else {
-                  this.raccoon.positionY -= this.canGoToDirection('up');
-              }
-              this.drawRaccoon();    
-              this.isUp = false;        
-            }
-            
-            else if (cursors.down.isDown && this.isDown)
-            {
-              this.goFiber();
-              if (this.raccoon.state != 'down'){
-                  this.raccoon.loadTexture('raccoon_front', 0);
-                  this.raccoon.state = 'down';
-              }
-              else {
-                  this.raccoon.positionY += this.canGoToDirection('down');
-              }
-              this.drawRaccoon();
-              this.isDown = false;         
-              this.sendToWS(this.getPos(this.raccoon));
-//                this.raccoon.animations.play('run');
-            }
-//            else
-//            {
-//                //  Stand still
-//                this.bot.animations.stop();
-//
-//                this.bot.frame = 4;
-//            }
-            
-            if (cursors.up.isUp){this.isUp = true;}
-            if (cursors.down.isUp){this.isDown = true;}
-            if (cursors.left.isUp){this.isLeft = true;}
-            if (cursors.right.isUp){this.isRight = true;}
+//            else{
+//                console.log('is washing');
+//                console.log(this.raccoon.angle);
+//                this.raccoon.anchor.setTo(0.5, 0.5); 
+//                if (angle_inc == 3 && this.raccoon.angle == 30){
+//                   angle_inc = -3
+//                } else if (angle_inc == -3 && this.raccoon.angle == -30)
+//             
+//                this.raccoon.angle += angle_inc;
+//            }    
+
 
         },
 
@@ -222,14 +235,11 @@
         
         goFiber: function(){
             var cloth = this.clothesGroup.create(-73, 560, 'clothes', 5); 
-            console.log(cloth);
+            cloth.line = 2;
             this.physics.arcade.enable(cloth);
             cloth.scale.x = 0.3; 
             cloth.scale.y = 0.3; 
-            cloth.body.velocity.x = 100;
-//            clothesGroup.add(cloth);
-
-            
+            cloth.body.velocity.x = 100;        
         },
         
         drawRaccoon: function(){
@@ -241,6 +251,45 @@
             this.raccoon.body.y = raccoonStartY + this.raccoon.positionY * raccoonStepY;
         },
         
+        processHandlerRaccoon: function  (raccoon, cloth) {
+            if (this.raccoon.positionY == cloth.line){
+                cloth.line = 100;
+                var splash = this.clothesGroup.create(cloth.body.x, cloth.body.y, 'splash'); 
+                splash.scale.x = 0.3; 
+                splash.scale.y = 0.3; 
+                if (cloth.body.x > raccoon.body.x){
+                    this.raccoon.loadTexture('raccoon_side', 0);
+                }
+                else {
+                    this.raccoon.loadTexture('raccoon_side', 1);
+                }
+                this.raccoon.pivot.setTo(0, 0);
+                this.raccoon.body.y -= 50;
+                this.is_washing = true;
+                game.add.tween(this.raccoon).to({angle:-30}, 150, 'Linear', true, 0, 5, true);
+                setTimeout(function() {this.is_washing = false; 
+                                       game.add.tween(cloth).to({x: 10,  y: 650}, 1000, 'Linear', true, 0);
+                                       this.raccoon.pivot.setTo(1, 1);
+                                       this.drawRaccoon();}.bind(this), 800);
+                
+            }
+            return false;
+
+        },
+        
+        processHandlerBucket: function  (bucket, cloth) {
+            cloth.kill();
+            
+            var wet = game.add.sprite(40+Math.floor((Math.random() * 25) + 1), 675+Math.floor((Math.random() * 10) + 1), 'wet_fiber');
+            wet.scale.x = 0.2;
+            wet.scale.y = 0.2;
+            return false;
+
+        },
+        
+        collisionHandler: function  (raccoon, cloth) {
+
+        },
         
         getPos: function(object) {
             var pos = JSON.stringify({
