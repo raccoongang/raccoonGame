@@ -153,10 +153,14 @@ window.onload = function () {
                         console.log('start');
                         console.log(data);
                         this.enemy = game.add.sprite(enemyStartX, enemyStartY - 3 * enemyStepY + enemyStumpIndent[0], 'raccoon_front', 0);
+                        this.enemyBucket = game.add.sprite(100, 190, 'bucket', 0);
                         this.physics.arcade.enable(this.enemy);
+                        this.physics.arcade.enable(this.enemyBucket);
                         this.enemy.body.collideWorldBounds = true;
                         this.enemy.scale.x = 0.1;
                         this.enemy.scale.y = 0.1;
+                        this.enemyBucket.scale.x = 0.1;
+                        this.enemyBucket.scale.y = 0.1;
                         this.enemy.raccoonLive = data.lives;
                         this.enemy.id = data.id;
                         // Draw stumps
@@ -228,6 +232,7 @@ window.onload = function () {
 
         update: function () {
             game.physics.arcade.collide(this.bucket, this.clothesGroup, this.collisionHandler, this.processHandlerBucket, this);
+            game.physics.arcade.collide(this.enemyBucket, this.clothesGroup, this.collisionHandler, this.processHandlerEnemyBucket, this);
             game.physics.arcade.collide(this.enemy, this.clothesGroup, this.collisionHandler, this.processHandlerEnemyRaccoon, this);
             this.clothesGroup.forEach(function(cloth){
                 if (cloth.body.x >= 1100 && !cloth.isEnemy){
@@ -574,7 +579,7 @@ window.onload = function () {
                 }, this);
                 setTimeout(function () {
                     this.is_washing = false;
-//                    game.add.tween(cloth).to({x: 10, y: 650}, 1000, 'Linear', true, 0);
+                    game.add.tween(cloth).to({x: 100,y: 190}, 1000, 'Linear', true, 0);
                     this.enemy.angle = 0;
                     splash.kill();
                 }.bind(this), 300);
@@ -594,7 +599,16 @@ window.onload = function () {
             return false;
 
         },
+        processHandlerEnemyBucket: function (bucket, cloth) {
+            cloth.kill();
 
+            var wet = game.add.sprite(110 + Math.floor((Math.random() * 15) + 1), 200 + Math.floor((Math.random() * 5) + 1), 'wet_fiber');
+            wet.scale.x = 0.1;
+            wet.scale.y = 0.1;
+            return false;
+
+        },
+        
         collisionHandler: function (raccoon, cloth) {
 
         },
