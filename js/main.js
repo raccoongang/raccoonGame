@@ -1,5 +1,6 @@
   window.onload = function() {
 
+    var id = Math.random();
     var game = new Phaser.Game(1200, 800, Phaser.CANVAS, 'game-container');
     var cursors;
     var playGame = function(game){}
@@ -11,6 +12,15 @@
     var myRaccoonStumpStartX = 150;
     var myRaccoonStumpStartY = 440;
       
+    
+    var enemyStumpSizeX = 81;
+    var enemyStumpSizeY = 36;
+    var enemyStumpSpaceX = 7;
+    var enemyStumpSpaceY = 12;
+    var enemyStumpStartX = 260;
+    var enemyStumpStartY = 300;
+
+      
       
     var raccoonStartX = 100;
     var raccoonStartY = 330; 
@@ -18,10 +28,21 @@
     var raccoonStepY = 77;
     var stumpIndent = [0, 8, 16, 24, 24, 16, 8, 0]  
     
+    var enemyStartX = 170;
+    var enemyStartY = 30;
+    var enemyStepX = 90;
+    var enemyStepY = 60;
+
+    var stumpIndent = [0, 8, 16, 24, 24, 16, 8, 0]
+    var enemyStumpIndent = [0, -8, -16, -24, -24, -16, -8, 0]
+
+    
     var clothesGroup;
 
     var ip = "192.168.0.109";
     var sock = new WebSocket("ws://" + ip + ":5678/ws");
+    var enemy;
+
 
     var _id = localStorage.getItem('_id');
     if (_id == null) {
@@ -73,15 +94,41 @@
              
             this.is_washing = false; 
 
-            var pos = this.getPos(this.raccoon);
+            var initMessage = this.composeInitMessage();
 
-            sock.onopen = function() {
-                sock.send(pos);
-            };
+            sock.send(initMessage);
 
             sock.onmessage = function(message) {
-                console.log(JSON.parse(message.data));
-            };
+                var data = JSON.parse(message.data);
+
+                if (data.type == 'init' && data.id !== id && enemy == undefined) {
+                    enemy = game.add.sprite(enemyStartX+enemyStepX, enemyStartY+3*enemyStepY, 'raccoon_front', 0);
+                    this.physics.arcade.enable(enemy);
+                    enemy.body.collideWorldBounds = true;
+                    enemy.scale.x = 0.1;
+                    enemy.scale.y = 0.1;
+                    enemy.positionX = 0;
+                    enemy.positionY = 3;
+
+                    // Draw stumps
+                    var invertedStumps = [];
+                    for (i = data.stumps.length; i >= 0; i--) {
+                        if (invertedStumps[0] == undefined) {
+                            invertedStumps[0] = data.stumps[i];
+                        }
+                        else {
+                            invertedStumps.push(data.stumps[i]);
+                        }
+                    }
+                    this.drawEnemyStumps(invertedStumps);
+                    sock.send(initMessage);
+                }
+                else if (data.id !== id) {
+                    console.log(JSON.parse(message.data));
+                }
+
+            }.bind(this);
+
 
 
 //            this.bot.animations.add('run');
@@ -108,6 +155,8 @@
                     this.drawRaccoon();
                     this.isUp = false; 
                     setTimeout(function() {this.isUp = true;}.bind(this), 200);
+                    this.sendToWS(this.getPos(this.raccoon));
+
                 }
                  else if (cursors.right.isDown && this.isUp)
                 {
@@ -135,8 +184,9 @@
                       this.raccoon.positionY -= this.canGoToDirection('up');
                   }
                   this.drawRaccoon();    
-                    this.isUp = false; 
-                    setTimeout(function() { this.isUp = true; }.bind(this), 200);       
+                  this.isUp = false; 
+                  setTimeout(function() { this.isUp = true; }.bind(this), 200);  
+                  this.sendToWS(this.getPos(this.raccoon));
                 }
 
                 else if (cursors.down.isDown && this.isUp)
@@ -150,8 +200,8 @@
                       this.raccoon.positionY += this.canGoToDirection('down');
                   }
                   this.drawRaccoon();
-                    this.isUp = false; 
-                    setTimeout(function() { this.isUp = true; }.bind(this), 200);        
+                  this.isUp = false; 
+                  setTimeout(function() { this.isUp = true; }.bind(this), 200);        
                   this.sendToWS(this.getPos(this.raccoon));
                 }
             }
@@ -198,6 +248,19 @@
                 }
             }
         },
+        
+        drawEnemyStumps: function(stumpsArray) {
+            for (var i=0; i < stumpsArray.length; i++){
+                for (var j=0; j < 3; j++ ){
+                    if (stumpsArray[i][j] == 1){
+                    var stump = game.add.image(enemyStumpStartX + i * (enemyStumpSizeX + enemyStumpSpaceX), enemyStumpStartY + j * (enemyStumpSizeY + enemyStumpSpaceY) + enemyStumpIndent[i], "stump");
+                    stump.scale.x = 0.5;
+                    stump.scale.y = 0.5;
+                    }
+                }
+            }
+        },
+
         
         canGoToDirection: function(direction){
           switch(direction) {
@@ -251,6 +314,16 @@
             this.raccoon.body.y = raccoonStartY + this.raccoon.positionY * raccoonStepY;
         },
         
+        drawEnemy: function(){
+            var leftCorrect = enemy.state == 'left' ? 70 : 0;
+            var upCorrect = enemy.state == 'up'  || enemy.state == 'down' ? 55 : 0;
+            enemy.body.x = enemyStartX + enemy.positionX * enemyStepX + leftCorrect + upCorrect;
+            console.log(enemy.state);
+            console.log(enemyStartY + enemy.positionY * enemyStepY);
+            enemy.body.y = enemyStartY + enemy.positionY * enemyStepY;
+        },
+
+        
         processHandlerRaccoon: function  (raccoon, cloth) {
             if (this.raccoon.positionY == cloth.line){
                 cloth.line = 100;
@@ -293,15 +366,24 @@
         
         getPos: function(object) {
             var pos = JSON.stringify({
-                _id: _id,
-                x: object.x,
-                y: object.y
+                id: id,
+                x: object.positionX,
+                y: object.positionY
             });
             return pos;
         },
 
         sendToWS: function(pos) {
             sock.send(pos);
+        },
+        
+        composeInitMessage: function() {
+            var initMessage = JSON.stringify({
+                id: id,
+                type: 'init',
+                stumps: this.stumpsArray
+            });
+            return initMessage;
         }
 
 //function render() {
