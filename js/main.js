@@ -41,15 +41,13 @@ window.onload = function () {
     var clothesGroup;
 
     var ip = "192.168.0.109";
-//    try {
-//        var sock = new WebSocket("ws://" + ip + ":5678/ws");
-//    }
-//    catch (err) {
-//        console.log("Якась ... з вашими сокетами.");
-//        var sock;
-//    }
-    var sock;
-    var enemy;
+    try {
+        var sock = new WebSocket("ws://" + ip + ":5678/ws");
+    }
+    catch (err) {
+        console.log("Якась ... з вашими сокетами.");
+        var sock;
+    }
 
 
     var _id = localStorage.getItem('_id');
@@ -124,15 +122,16 @@ window.onload = function () {
                 sock.send(initMessage);
 
                 sock.onmessage = function (message) {
+                    console.log(this);
                     var data = JSON.parse(message.data);
-
-                    if (data.type == 'init' && data.id !== id && enemy == undefined) {
-                        enemy = game.add.sprite(enemyStartX + enemyStepX, enemyStartY + 3 * enemyStepY, 'raccoon_front', 0);
-                        this.physics.arcade.enable(enemy);
-                        enemy.body.collideWorldBounds = true;
-                        enemy.scale.x = 0.1;
-                        enemy.scale.y = 0.1;
-                        enemy.id = data.id;
+                    if (data.type == 'init' && data.id !== id && this.enemy == undefined) {
+                        console.log('start');
+                        this.enemy = game.add.sprite(enemyStartX + enemyStepX, enemyStartY + 3 * enemyStepY, 'raccoon_front', 0);
+                        this.physics.arcade.enable(this.enemy);
+                        this.enemy.body.collideWorldBounds = true;
+                        this.enemy.scale.x = 0.1;
+                        this.enemy.scale.y = 0.1;
+                        this.enemy.id = data.id;
 
                         // Draw stumps
                         var invertedStumps = [];
@@ -148,11 +147,13 @@ window.onload = function () {
                         this.drawEnemyStumps(invertedStumps);
                         sock.send(initMessage);
                     }
-                    else if (data.id !== id && enemy !== undefined) {
-                        enemy.positionX = data.x;
-                        enemy.positionY = data.y;
-                        enemy.state = data.state;
-                        this.drawEnemy(enemy);
+                    else if (data.id !== id && this.enemy !== undefined) {
+                        this.enemy.positionX = data.x;
+                        this.enemy.positionY = data.y;
+                        this.enemy.state = data.state;
+                        console.log('update ', this.enemy);
+
+                        this.drawEnemy();
                     }
 
                 }.bind(this);
@@ -404,13 +405,17 @@ window.onload = function () {
         ,
 
         drawEnemy: function () {
-            var leftCorrect = enemy.state == 'left' ? 70 : 0;
-            var upCorrect = enemy.state == 'up' || enemy.state == 'down' ? 55 : 0;
-            enemy.body.x = enemyStartX + enemy.positionX * enemyStepX + leftCorrect + upCorrect;
-            console.log(enemy.state);
-            console.log(enemyStartY + enemy.positionY * enemyStepY);
+            var leftCorrect = this.enemy.state == 'left' ? 70 : 0;
+            var upCorrect = this.enemy.state == 'up' || this.enemy.state == 'down' ? 55 : 0;
+            this.enemy.body.x = enemyStartX + this.enemy.positionX * enemyStepX + leftCorrect + upCorrect;
+            console.log(this.enemy.state);
+            console.log(enemyStartY + this.enemy.positionY * enemyStepY);
+            console.log(this.enemy.body.x);
             console.log('Draw');
-            enemy.body.y = enemyStartY + enemy.positionY * enemyStepY;
+            console.log(this.enemy);
+            console.log(enemyStartX + this.enemy.positionX * enemyStepX + leftCorrect + upCorrect);
+            
+            this.enemy.body.y = enemyStartY + this.enemy.positionY * enemyStepY;
         }
         ,
 
