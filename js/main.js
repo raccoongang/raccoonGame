@@ -333,18 +333,7 @@ window.onload = function () {
                     }.bind(this), 200);
                     this.sendToWS(this.getPos(this.raccoon));
                 }
-            }
-//            else{
-//                console.log('is washing');
-//                console.log(this.raccoon.angle);
-//                this.raccoon.anchor.setTo(0.5, 0.5); 
-//                if (angle_inc == 3 && this.raccoon.angle == 30){
-//                   angle_inc = -3
-//                } else if (angle_inc == -3 && this.raccoon.angle == -30)
-//             
-//                this.raccoon.angle += angle_inc;
-//            }    
-
+            }  
 
             if (this.spaceKey.isDown) {
                 this.throwClothes(false);
@@ -365,8 +354,8 @@ window.onload = function () {
                 [1, 1, 1, 1]
             ];
             for (var i = 0; i < stumpsArray.length; i++) {
-                j = Math.floor(Math.random() * (i + 1));
-                temp = stumpsArray[i];
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = stumpsArray[i];
                 stumpsArray[i] = stumpsArray[j];
                 stumpsArray[j] = temp;
             }
@@ -750,7 +739,7 @@ window.onload = function () {
         game.debug.bodyInfo(this.raccoon, 32, 32);
 
         game.debug.body(this.raccoon);
-        game.debug.body(this.enemy);
+//        game.debug.body(this.enemy);
 
     }
 
