@@ -1,4 +1,4 @@
-window.onload = function () {
+  window.onload = function() {
 
     var id = Math.random();
     var game = new Phaser.Game(1200, 800, Phaser.CANVAS, 'game-container');
@@ -8,7 +8,7 @@ window.onload = function () {
     var stumpSizeX = 102;
     var stumpSizeY = 52;
     var stumpSpaceX = 14;
-    var stumpSpaceY = 25;
+    var stumpSpaceY = 25;      
     var myRaccoonStumpStartX = 150;
     var myRaccoonStumpStartY = 440;
       
@@ -19,11 +19,11 @@ window.onload = function () {
     var enemyStumpSpaceY = 12;
     var enemyStumpStartX = 260;
     var enemyStumpStartY = 300;
-    
-
+      
+      
     var raccoonStartX = 100;
-    var raccoonStartY = 330;
-    var raccoonStepX = 116;
+    var raccoonStartY = 330; 
+    var raccoonStepX = 116;  
     var raccoonStepY = 77;
     var stumpIndent = [0, 8, 16, 24, 24, 16, 8, 0]  
     
@@ -37,9 +37,16 @@ window.onload = function () {
 
     
     var clothesGroup;
-
+      
     var ip = "192.168.0.109";
-    var sock = new WebSocket("ws://" + ip + ":5678/ws");
+    try {
+        var sock = new WebSocket("ws://" + ip + ":5678/ws");
+    }
+    catch(err) {
+        console.log("Якась ... з вашими сокетами.");
+        var sock;
+    }
+    
     var enemy;
 
 
@@ -50,7 +57,7 @@ window.onload = function () {
 
     playGame.prototype = {
 
-        preload: function () {
+         preload: function() {
             game.load.spritesheet('landscape', '/assets/landscape.jpg');
             game.load.spritesheet('raccoon_side', '/assets/raccoon_side.png', 510, 509) 
             game.load.spritesheet('raccoon_front', '/assets/raccoon_front.png', 465, 511) 
@@ -59,6 +66,7 @@ window.onload = function () {
             game.load.spritesheet('splash', '/assets/splash.png'); 
             game.load.spritesheet('bucket', '/assets/bucket.png'); 
             game.load.spritesheet('wet_fiber', '/assets/wet_fiber.png'); 
+            game.load.spritesheet('waves', '/assets/waves.png'); 
              
             this.isUp = true;
 //           game.load.atlasJSONHash('bot', '/assets/running_bot.png', '/assets/running_bot.json');
@@ -72,7 +80,20 @@ window.onload = function () {
             game.world.bounds = new Phaser.Rectangle(50, 50, 1100, 700); 
             game.physics.startSystem(Phaser.Physics.ARCADE);
             game.physics.setBoundsToWorld();
-
+            
+          
+            game.add.sprite(0, 0, 'landscape'); 
+            this.waves = game.add.sprite(-300, 330, 'waves'); 
+            this.bucket = game.add.sprite(10, 650, 'bucket');
+            game.add.tween(this.waves).to({x:1000}, 100000, 'Linear', true, 0, -1); 
+            this.bucket.scale.x = 0.2;
+            this.bucket.scale.y = 0.2; 
+            this.physics.arcade.enable(this.bucket); 
+            this.clothesGroup = game.add.physicsGroup(); 
+            this.enemyGroup = game.add.physicsGroup();  
+            this.drawStumps(this.stumpsArray); 
+            this.raccoon = game.add.sprite(raccoonStartX, raccoonStartY+3*raccoonStepY, 'raccoon_side', 0);
+            this.raccoon.state = 'right' 
 
             game.add.sprite(0, 0, 'landscape');
             this.clothesGroup = game.add.physicsGroup();
@@ -89,6 +110,7 @@ window.onload = function () {
             this.raccoon = game.add.sprite(raccoonStartX, raccoonStartY + 3 * raccoonStepY, 'raccoon_side', 0);
             this.raccoon.state = 'right';
             this.physics.arcade.enable(this.raccoon);
+             
             this.raccoon.body.collideWorldBounds = true;
             this.raccoon.scale.x = 0.3; 
             this.raccoon.scale.y = 0.3; 
@@ -99,13 +121,39 @@ window.onload = function () {
 
             var initMessage = this.composeInitMessage();
 
+<<<<<<< Updated upstream
+            if (sock !== undefined) {
+                sock.send(initMessage);
+
+                sock.onmessage = function(message) {
+                    var data = JSON.parse(message.data);
+
+                    if (data.type == 'init' && data.id !== id && enemy == undefined) {
+                        enemy = game.add.sprite(enemyStartX+enemyStepX, enemyStartY+3*enemyStepY, 'raccoon_front', 0);
+                        this.physics.arcade.enable(enemy);
+                        enemy.body.collideWorldBounds = true;
+                        enemy.scale.x = 0.1;
+                        enemy.scale.y = 0.1;
+                        enemy.positionX = 0;
+                        enemy.positionY = 3;
+
+                        // Draw stumps
+                        var invertedStumps = [];
+                        for (i = data.stumps.length; i >= 0; i--) {
+                            if (invertedStumps[0] == undefined) {
+                                invertedStumps[0] = data.stumps[i];
+                            }
+                            else {
+                                invertedStumps.push(data.stumps[i]);
+                            }
+=======
             sock.send(initMessage);
 
             sock.onmessage = function(message) {
                 var data = JSON.parse(message.data);
 
                 if (data.type == 'init' && data.id !== id && enemy == undefined) {
-                    enemy = game.add.sprite(enemyStartX+enemyStepX, enemyStartY+3*enemyStepY, 'raccoon_front', 0);
+                    enemy = this.enemyGroup.create(enemyStartX+enemyStepX, enemyStartY+3*enemyStepY, 'raccoon_front', 0);
                     this.physics.arcade.enable(enemy);
                     enemy.body.collideWorldBounds = true;
                     enemy.scale.x = 0.1;
@@ -122,15 +170,15 @@ window.onload = function () {
                         else {
                             invertedStumps.push(data.stumps[i]);
                         }
+                        this.drawEnemyStumps(invertedStumps);
+                        sock.send(initMessage);
                     }
-                    this.drawEnemyStumps(invertedStumps);
-                    sock.send(initMessage);
-                }
-                else if (data.id !== id) {
-                    console.log(JSON.parse(message.data));
-                }
+                    else if (data.id !== id) {
+                        console.log(JSON.parse(message.data));
+                    }
 
-            }.bind(this);
+                }.bind(this);
+            }
 
 
 
@@ -138,6 +186,7 @@ window.onload = function () {
 //            this.bot.animations.play('run', 15, true);
 
 //            this.input.onDown.addOnce(this.changeMummy, this);
+             cursors = game.input.keyboard.createCursorKeys();
 
             this.spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
             game.input.keyboard.addKeyCapture([ Phaser.Keyboard.SPACEBAR ]);
@@ -265,7 +314,7 @@ window.onload = function () {
             for (var i=0; i < stumpsArray.length; i++){
                 for (var j=0; j < 3; j++ ){
                     if (stumpsArray[i][j] == 1){
-                    var stump = game.add.image(enemyStumpStartX + i * (enemyStumpSizeX + enemyStumpSpaceX), enemyStumpStartY + j * (enemyStumpSizeY + enemyStumpSpaceY) + enemyStumpIndent[i], "stump");
+                    var stump = this.enemyGroup.create(enemyStumpStartX + i * (enemyStumpSizeX + enemyStumpSpaceX), enemyStumpStartY + j * (enemyStumpSizeY + enemyStumpSpaceY) + enemyStumpIndent[i], "stump");
                     stump.scale.x = 0.5;
                     stump.scale.y = 0.5;
                     }
@@ -385,8 +434,10 @@ window.onload = function () {
             return pos;
         },
 
-        sendToWS: function (pos) {
-            sock.send(pos);
+        sendToWS: function(pos) {
+            if (sock !== undefined) {
+                sock.send(pos);
+            }
         },
         
         composeInitMessage: function() {
