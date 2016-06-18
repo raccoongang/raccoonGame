@@ -34,7 +34,7 @@ window.onload = function () {
     var enemyStepY = 53;
 
     var stumpIndent = [0, 8, 16, 24, 24, 16, 8, 0];
-    var fireIndent = [185, 140, 64, 0, 0, -12, -20, -45];
+    var fireIndent = [285, 372, 459, 546, 633, 720, 807, 894];
     var enemyStumpIndent = [0, -8, -16, -24, -24, -16, -8, 0];
 
 
@@ -52,8 +52,9 @@ window.onload = function () {
 
         preload: function () {
             game.load.spritesheet('landscape', '/assets/landscape.jpg');
-            game.load.spritesheet('raccoon_side', '/assets/raccoon_side.png', 510, 509)
-            game.load.spritesheet('raccoon_front', '/assets/raccoon_front.png', 465, 511)
+            game.load.spritesheet('raccoon_side', '/assets/raccoon_side.png', 510, 509);
+            game.load.spritesheet('raccoon_front', '/assets/raccoon_front.png', 465, 511);
+            game.load.spritesheet('raccoon_bang', '/assets/raccoon_bang.png');
             game.load.spritesheet('clothes', '/assets/clothes.png', 226, 212);
             game.load.spritesheet('stump', '/assets/stump.png');
             game.load.spritesheet('splash', '/assets/splash_Sprites.png', 64, 64);
@@ -121,6 +122,13 @@ window.onload = function () {
             this.raccoon = game.add.sprite(raccoonStartX, raccoonStartY + 3 * raccoonStepY, 'raccoon_side', 0);
             this.raccoon.state = 'right'
             this.physics.arcade.enable(this.raccoon);
+
+            this.bullets = game.add.physicsGroup();
+            this.bullets.enableBody = true;
+            this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
+            this.bullets.createMultiple(1, 'wet_fiber');
+            this.bullets.callAll('events.onOutOfBounds.add', 'events.onOutOfBounds', this.resetBullet, this);
+            this.bullets.setAll('checkWorldBounds', true);
                         
             this.raccoon.body.collideWorldBounds = true;
             this.raccoon.scale.x = 0.3;
@@ -130,13 +138,6 @@ window.onload = function () {
             this.raccoon.raccoonLives = 5;
 
             this.clothVelocity = 100;
-
-            this.bullets = game.add.physicsGroup();
-            this.bullets.enableBody = true;
-            this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
-            this.bullets.createMultiple(1, 'wet_fiber');
-            this.bullets.callAll('events.onOutOfBounds.add', 'events.onOutOfBounds', this.resetBullet, this);
-            this.bullets.setAll('checkWorldBounds', true);
 
             this.is_washing = false;
             this.score = 0;
@@ -235,6 +236,7 @@ window.onload = function () {
             game.physics.arcade.collide(this.bucket, this.clothesGroup, this.collisionHandler, this.processHandlerBucket, this);
             game.physics.arcade.collide(this.enemyBucket, this.clothesGroup, this.collisionHandler, this.processHandlerEnemyBucket, this);
             game.physics.arcade.collide(this.enemy, this.clothesGroup, this.collisionHandler, this.processHandlerEnemyRaccoon, this);
+            game.physics.arcade.collide(this.bullets, this.enemy, this.collisionHandler, this.fireCollision, this);
             this.clothesGroup.forEach(function(cloth){
                 if (cloth.body.x >= 1100 && !cloth.isEnemy){
                        cloth.kill();
@@ -587,8 +589,7 @@ window.onload = function () {
             }
             return false;
 
-        }
-        ,
+        },
 
         processHandlerBucket: function (bucket, cloth) {
             cloth.kill();
@@ -696,9 +697,8 @@ window.onload = function () {
                         Phaser.Easing.Linear.None,
                         true
                     );
-                    var x_offset = fireIndent[this.raccoon.positionX];
                     var tween = game.add.tween(bullet).to(
-                        {y: 235, x: this.raccoon.x + x_offset},
+                        {y: 235, x: fireIndent[this.raccoon.positionX]},
                         bullet_velocity + (this.raccoon.positionY * (bullet_velocity / this.raccoon.positionY ? this.raccoon.positionY : 1)),
                         Phaser.Easing.Linear.None,
                         true
@@ -718,6 +718,12 @@ window.onload = function () {
         resetBullet: function (bullet) {
             bullet.kill();
         },
+
+        fireCollision: function(){
+            this.enemy.state = 'up';
+            this.raccoon.loadTexture('raccoon_bang', 0);
+            this.drawEnemy();
+        }
         
 
 //function render() {
