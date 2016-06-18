@@ -733,6 +733,7 @@ window.onload = function () {
 
         resetBullet: function (bullet) {
             bullet.kill();
+            this.bullets.remove(bullet);
         },
 
         fireCollision: function(){
