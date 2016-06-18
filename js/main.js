@@ -29,10 +29,10 @@ window.onload = function () {
     var raccoonStepY = 77;
     var stumpIndent = [0, 8, 16, 24, 24, 16, 8, 0]
 
-    var enemyStartX = 170;
-    var enemyStartY = 390;
-    var enemyStepX = 90;
-    var enemyStepY = 60;
+    var enemyStartX = 263;
+    var enemyStartY = 345;
+    var enemyStepX = 86;
+    var enemyStepY = 53;
 
     var stumpIndent = [0, 8, 16, 24, 24, 16, 8, 0]
     var enemyStumpIndent = [0, -8, -16, -24, -24, -16, -8, 0]
@@ -157,7 +157,7 @@ window.onload = function () {
                     if (data.type == 'init' && data.id !== id && this.enemy == undefined) {
                         console.log('start');
                         console.log(data);
-                        this.enemy = game.add.sprite(enemyStartX + enemyStepX, enemyStartY - 3 * enemyStepY, 'raccoon_front', 0);
+                        this.enemy = game.add.sprite(enemyStartX, enemyStartY - 3 * enemyStepY + enemyStumpIndent[0], 'raccoon_front', 0);
                         this.physics.arcade.enable(this.enemy);
                         this.enemy.body.collideWorldBounds = true;
                         this.enemy.scale.x = 0.1;
@@ -198,6 +198,8 @@ window.onload = function () {
                         else if (data.state == 'up') {
                             this.enemy.loadTexture('raccoon_front', 0);
                         }
+                        this.enemy.scale.x = 0.1;
+                        this.enemy.scale.y = 0.1;
                         console.log('update ', this.enemy);
                         console.log(data.x, data.y);
 
@@ -474,21 +476,26 @@ window.onload = function () {
             var leftCorrect = this.raccoon.state == 'left' ? 70 : 0;
             var upCorrect = this.raccoon.state == 'up' || this.raccoon.state == 'down' ? 55 : 0;
             this.raccoon.body.x = raccoonStartX + this.raccoon.positionX * raccoonStepX + leftCorrect + upCorrect;
-            console.log(this.raccoon.state);
-            console.log(raccoonStartY + this.raccoon.positionY * raccoonStepY);
-            this.raccoon.body.y = raccoonStartY + this.raccoon.positionY * raccoonStepY;
+            this.raccoon.body.y = raccoonStartY + this.raccoon.positionY * raccoonStepY + stumpIndent[this.raccoon.positionX];
         }
         ,
 
         drawEnemy: function () {
-            var leftCorrect = this.enemy.state == 'left' ? 70 : 0;
-            var upCorrect = this.enemy.state == 'up' || this.enemy.state == 'down' ? 55 : 0;
+            var leftCorrect = 0;
+            if (this.enemy.state == 'right'){
+                leftCorrect = -22;
+            } else if (this.enemy.state == 'left'){
+                leftCorrect = 22;
+            }
+            var upCorrect = this.enemy.state == 'up' || this.enemy.state == 'down' ? 18 : 0;
 
             this.enemy.body.x = enemyStartX + this.enemy.positionX * enemyStepX + leftCorrect + upCorrect;
-            this.enemy.x = enemyStartX + this.enemy.positionX * enemyStepX + leftCorrect + upCorrect;
+            this.enemy.x = enemyStartX + this.enemy.positionX * enemyStepX + leftCorrect + upCorrect + enemyStumpIndent[this.enemy.positionX];
             
             this.enemy.body.y = enemyStartY - this.enemy.positionY * enemyStepY;
             this.enemy.y = enemyStartY - this.enemy.positionY * enemyStepY;
+            this.enemy.scale.x = 0.1;
+            this.enemy.scale.y = 0.1;
         }
         ,
 
