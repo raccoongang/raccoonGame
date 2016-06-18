@@ -32,6 +32,9 @@
             game.load.spritesheet('raccoon_front', '/assets/raccoon_front.png', 465, 511) 
             game.load.spritesheet('clothes', '/assets/clothes.png', 226, 212);
             game.load.spritesheet('stump', '/assets/stump.png');
+            game.load.spritesheet('splash', '/assets/splash.png'); 
+            game.load.spritesheet('bucket', '/assets/bucket.png'); 
+            game.load.spritesheet('wet_fiber', '/assets/wet_fiber.png'); 
              
             this.isUp = true;this.isDown = true;this.isLeft = true;this.isRight = true;
 //           game.load.atlasJSONHash('bot', '/assets/running_bot.png', '/assets/running_bot.json');
@@ -48,14 +51,16 @@
             
           
             game.add.sprite(0, 0, 'landscape'); 
+            this.bucket = game.add.sprite(10, 650, 'bucket');
+            this.bucket.scale.x = 0.2;
+            this.bucket.scale.y = 0.2; 
+            this.physics.arcade.enable(this.bucket); 
             this.clothesGroup = game.add.physicsGroup(); 
-//            this.clothesGroup.addAt(game.add.physicsGroup, 0);
-//            this.clothesGroup.addAt(game.add.physicsGroup, 1);
-//            this.clothesGroup.addAt(game.add.physicsGroup, 2);
             this.drawStumps(this.stumpsArray); 
             this.raccoon = game.add.sprite(raccoonStartX, raccoonStartY+3*raccoonStepY, 'raccoon_side', 0);
             this.raccoon.state = 'right' 
             this.physics.arcade.enable(this.raccoon);
+             
             this.raccoon.body.collideWorldBounds = true;
             this.raccoon.scale.x = 0.3; 
             this.raccoon.scale.y = 0.3; 
@@ -82,6 +87,9 @@
         },
 
         update: function(){
+            game.physics.arcade.collide(this.raccoon, this.clothesGroup, this.collisionHandler, this.processHandlerRaccoon, this);
+            game.physics.arcade.collide(this.bucket, this.clothesGroup, this.collisionHandler, this.processHandlerBucket, this);
+            
             if (cursors.left.isDown && this.isLeft)
             {
                 if (this.raccoon.state != 'left'){
@@ -218,14 +226,11 @@
         
         goFiber: function(){
             var cloth = this.clothesGroup.create(-73, 560, 'clothes', 5); 
-            console.log(cloth);
+            cloth.line = 2;
             this.physics.arcade.enable(cloth);
             cloth.scale.x = 0.3; 
             cloth.scale.y = 0.3; 
-            cloth.body.velocity.x = 100;
-//            clothesGroup.add(cloth);
-
-            
+            cloth.body.velocity.x = 100;        
         },
         
         drawRaccoon: function(){
@@ -237,6 +242,31 @@
             this.raccoon.body.y = raccoonStartY + this.raccoon.positionY * raccoonStepY;
         },
         
+        processHandlerRaccoon: function  (raccoon, cloth) {
+            if (this.raccoon.positionY == cloth.line){
+                var splash = this.clothesGroup.create(cloth.body.x, cloth.body.y, 'splash'); 
+                splash.scale.x = 0.3; 
+                splash.scale.y = 0.3; 
+                game.add.tween(cloth).to({x: 10,  y: 650}, 1000, 'Linear', true, 0);
+//                cloth.kill();
+                
+            }
+            return false;
+
+        },
+        
+        processHandlerBucket: function  (bucket, cloth) {
+            cloth.kill();
+            var wet = game.add.sprite(40, 680, 'wet_fiber');
+            wet.scale.x = 0.2;
+            wet.scale.y = 0.2;
+            return false;
+
+        },
+        
+        collisionHandler: function  (raccoon, cloth) {
+
+        },
         
         getPos: function(object) {
             var pos = JSON.stringify({
