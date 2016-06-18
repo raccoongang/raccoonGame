@@ -668,10 +668,9 @@ window.onload = function () {
                 var bullet_velocity = 600;
 
                 if (bullet) {
-                    var leftCorrect = this.raccoon.state == 'right' ? 80 : 0;
                     bullet.scale.x = 0.4;
                     bullet.scale.y = 0.4;
-                    bullet.reset(this.raccoon.x + leftCorrect + upCorrect, this.raccoon.body.y);
+                    bullet.reset(this.raccoon.x + (raccoonSizeX*raccoonScale)/2, this.raccoon.body.y);
                     bullet.body.velocity.y = 0;
                     bullet.anchor.setTo(0.5, 0.5);
                     game.add.tween(bullet).to(
