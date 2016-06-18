@@ -78,7 +78,7 @@ window.onload = function () {
                     }
                 };
 
-                this.sock._send = function(message, callback){
+                this.sock._send = function (message, callback) {
                     self.waitForConnection(function () {
                         self.sock.send(message);
                         if (typeof callback !== 'undefined') {
@@ -112,12 +112,6 @@ window.onload = function () {
             this.bucket.scale.x = 0.2;
             this.bucket.scale.y = 0.2;
             this.physics.arcade.enable(this.bucket);
-            this.text = game.add.text(
-                this.bucket.x,
-                this.bucket.y + 100,
-                "Washed: 0",
-                { font: "35px Arial", fill: "#ffffff", align: "center" }
-            );
             this.clothesGroup = game.add.physicsGroup();
             this.enemyGroup = game.add.physicsGroup();
             this.livesGroup = game.add.physicsGroup();
@@ -133,7 +127,6 @@ window.onload = function () {
             this.raccoon.positionX = 0;
             this.raccoon.positionY = 3;
             this.raccoon.raccoonLives = 5;
-            this.raccoon.washed = 0;
 
             this.clothVelocity = 100;
 
@@ -146,8 +139,8 @@ window.onload = function () {
 
             this.is_washing = false;
             this.score = 0;
-            var style = { font: "32px Arial", fill: "#ff0044", align: "center", };
-            this.score_text = game.add.text(20, 20, "Score: "+this.score, style);
+            var style = { font: "32px Arial", fill: "#ffffff", align: "center", };
+            this.score_text = game.add.text(this.bucket.x, this.bucket.y + 100, "Score: "+this.score, style);
             this.drawLives();
 
             var initMessage = this.composeInitMessage();    
@@ -179,7 +172,7 @@ window.onload = function () {
 //                        }
                         this.drawEnemyStumps(data.stumps);
                         this.drawEnemyLives();
-                        this.sock.send(initMessage);
+                        this.sock._send(initMessage);
                     }
                     if (data.type == 'fiber' && data.id !== id && this.enemy !== undefined) {
                         console.log(data);
@@ -388,7 +381,7 @@ window.onload = function () {
               oneLive.scale.x = 0.3;
               oneLive.scale.y = 0.3;
           }
-          this.sock.send(this.composeLives());
+          this.sock._send(this.composeLives());
         },
         
        drawEnemyLives: function(){
@@ -534,7 +527,6 @@ window.onload = function () {
                     this.raccoon.state = 'left';
                 }
                 this.drawRaccoon();
-                this.text = "Washed: " + this.raccoon.washed++;
                 this.is_washing = true;
                 var tween = game.add.tween(this.raccoon).to({angle: -30}, 50, 'Linear', true, 0, 5, true);
                 tween.onComplete.add(function () { 
