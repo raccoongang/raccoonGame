@@ -145,9 +145,8 @@ window.onload = function () {
             this.score = 0;
             var style = { font: "32px Arial", fill: "#ff0044", align: "center", };
             this.score_text = game.add.text(20, 20, "Score: "+this.score, style);
-            
-            this.drawLives(); 
-                        
+            this.drawLives();
+
             var initMessage = this.composeInitMessage();    
             if (this.sock !== undefined) {
                 this.sock._send(initMessage);
@@ -162,6 +161,7 @@ window.onload = function () {
                         this.enemy.body.collideWorldBounds = true;
                         this.enemy.scale.x = 0.1;
                         this.enemy.scale.y = 0.1;
+                        this.enemy.raccoonLive = data.lives;
                         this.enemy.id = data.id;
                         // Draw stumps
 //                        var invertedStumps = [];
@@ -175,11 +175,17 @@ window.onload = function () {
 //
 //                        }
                         this.drawEnemyStumps(data.stumps);
-                        this.sock._send(initMessage);
+                        this.drawEnemyLives();
+                        this.sock.send(initMessage);
                     }
                     if (data.type == 'fiber' && data.id !== id && this.enemy !== undefined) {
                         console.log(data);
                         this.goEnemyFiber(data.line, data.velocity);
+                    }
+                    if (data.type == 'lives' && data.id !== id && this.enemy !== undefined) {
+                        console.log(data);
+                        this.enemy.raccoonLives = data.lives;
+                        this.drawEnemyLives();
                     }
                     else if (data.id !== id && this.enemy !== undefined) {
                         console.log(id, data.id);
@@ -378,7 +384,7 @@ window.onload = function () {
               oneLive.scale.x = 0.3;
               oneLive.scale.y = 0.3;
           }
-          this.sock.send();
+          this.sock.send(this.composeLives());
         },
         
        drawEnemyLives: function(){
@@ -388,7 +394,7 @@ window.onload = function () {
               }
           });
            console.log(this.enemy.raccoonLives);
-          for(var i=1; i<=this.raccoon.raccoonLives; i++){
+          for(var i=1; i<=this.enemy.raccoonLives; i++){
               var oneLive = this.livesGroup.create(600 + 50*i, 750, 'live');
               oneLive.enemy = true;
               oneLive.tint = 0x000000;
@@ -614,7 +620,8 @@ window.onload = function () {
             var initMessage = JSON.stringify({
                 id: id,
                 type: 'init',
-                stumps: this.stumpsArray
+                stumps: this.stumpsArray,
+                lives: this.raccoon.raccoonLives
             });
             return initMessage;
         },
@@ -629,11 +636,11 @@ window.onload = function () {
             return fiberMessage;
         },
         
-        composeLives: function (lives) {
+        composeLives: function () {
             var livesMessage = JSON.stringify({
                 id: id,
                 type: 'lives',
-                lives: lives
+                lives: this.raccoon.raccoonLives
             });
             return livesMessage;
         },
