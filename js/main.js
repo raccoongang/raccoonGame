@@ -38,9 +38,16 @@
 
     
     var clothesGroup;
-
+      
     var ip = "192.168.0.109";
-    var sock = new WebSocket("ws://" + ip + ":5678/ws");
+    try {
+        var sock = new WebSocket("ws://" + ip + ":5678/ws");
+    }
+    catch(err) {
+        console.log("Якась ... з вашими сокетами.");
+        var sock;
+    }
+    
     var enemy;
 
 
@@ -96,39 +103,40 @@
 
             var initMessage = this.composeInitMessage();
 
-            sock.send(initMessage);
+            if (sock !== undefined) {
+                sock.send(initMessage);
 
-            sock.onmessage = function(message) {
-                var data = JSON.parse(message.data);
+                sock.onmessage = function(message) {
+                    var data = JSON.parse(message.data);
 
-                if (data.type == 'init' && data.id !== id && enemy == undefined) {
-                    enemy = game.add.sprite(enemyStartX+enemyStepX, enemyStartY+3*enemyStepY, 'raccoon_front', 0);
-                    this.physics.arcade.enable(enemy);
-                    enemy.body.collideWorldBounds = true;
-                    enemy.scale.x = 0.1;
-                    enemy.scale.y = 0.1;
-                    enemy.positionX = 0;
-                    enemy.positionY = 3;
+                    if (data.type == 'init' && data.id !== id && enemy == undefined) {
+                        enemy = game.add.sprite(enemyStartX+enemyStepX, enemyStartY+3*enemyStepY, 'raccoon_front', 0);
+                        this.physics.arcade.enable(enemy);
+                        enemy.body.collideWorldBounds = true;
+                        enemy.scale.x = 0.1;
+                        enemy.scale.y = 0.1;
+                        enemy.positionX = 0;
+                        enemy.positionY = 3;
 
-                    // Draw stumps
-                    var invertedStumps = [];
-                    for (i = data.stumps.length; i >= 0; i--) {
-                        if (invertedStumps[0] == undefined) {
-                            invertedStumps[0] = data.stumps[i];
+                        // Draw stumps
+                        var invertedStumps = [];
+                        for (i = data.stumps.length; i >= 0; i--) {
+                            if (invertedStumps[0] == undefined) {
+                                invertedStumps[0] = data.stumps[i];
+                            }
+                            else {
+                                invertedStumps.push(data.stumps[i]);
+                            }
                         }
-                        else {
-                            invertedStumps.push(data.stumps[i]);
-                        }
+                        this.drawEnemyStumps(invertedStumps);
+                        sock.send(initMessage);
                     }
-                    this.drawEnemyStumps(invertedStumps);
-                    sock.send(initMessage);
-                }
-                else if (data.id !== id) {
-                    console.log(JSON.parse(message.data));
-                }
+                    else if (data.id !== id) {
+                        console.log(JSON.parse(message.data));
+                    }
 
-            }.bind(this);
-
+                }.bind(this);
+            }
 
 
 //            this.bot.animations.add('run');
@@ -374,7 +382,9 @@
         },
 
         sendToWS: function(pos) {
-            sock.send(pos);
+            if (sock !== undefined) {
+                sock.send(pos);
+            }
         },
         
         composeInitMessage: function() {
