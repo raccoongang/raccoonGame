@@ -153,7 +153,7 @@ window.onload = function () {
                         console.log('start');
                         console.log(data);
                         this.enemy = game.add.sprite(enemyStartX, enemyStartY - 3 * enemyStepY + enemyStumpIndent[0], 'raccoon_front', 0);
-                        this.enemyBucket = game.add.sprite(100, 190, 'bucket', 0);
+                        this.enemyBucket = game.add.sprite(1100, 210, 'bucket', 0);
                         this.physics.arcade.enable(this.enemy);
                         this.physics.arcade.enable(this.enemyBucket);
                         this.enemy.body.collideWorldBounds = true;
@@ -491,12 +491,12 @@ window.onload = function () {
 
         drawEnemy: function () {
             var leftCorrect = 0;
-            if (this.enemy.state == 'right'){
-                leftCorrect = -22;
-            } else if (this.enemy.state == 'left'){
-                leftCorrect = 22;
-            }
-            var upCorrect = this.enemy.state == 'up' || this.enemy.state == 'down' ? 18 : 0;
+//            if (this.enemy.state == 'right'){
+//                leftCorrect = -22;
+//            } else if (this.enemy.state == 'left'){
+//                leftCorrect = 22;
+//            }
+//            var upCorrect = this.enemy.state == 'up' || this.enemy.state == 'down' ? 18 : 0;
 
             this.enemy.body.x = enemyStartX + this.enemy.positionX * enemyStepX + leftCorrect + upCorrect;
             this.enemy.x = enemyStartX + this.enemy.positionX * enemyStepX + leftCorrect + upCorrect + enemyStumpIndent[this.enemy.positionX];
@@ -579,7 +579,7 @@ window.onload = function () {
                 }, this);
                 setTimeout(function () {
                     this.is_washing = false;
-                    game.add.tween(cloth).to({x: 100,y: 190}, 1000, 'Linear', true, 0);
+                    game.add.tween(cloth).to({x: 1100,y: 210}, 1000, 'Linear', true, 0);
                     this.enemy.angle = 0;
                     splash.kill();
                 }.bind(this), 300);
@@ -602,7 +602,7 @@ window.onload = function () {
         processHandlerEnemyBucket: function (bucket, cloth) {
             cloth.kill();
 
-            var wet = game.add.sprite(110 + Math.floor((Math.random() * 15) + 1), 200 + Math.floor((Math.random() * 5) + 1), 'wet_fiber');
+            var wet = game.add.sprite(1110 + Math.floor((Math.random() * 15) + 1), 220 + Math.floor((Math.random() * 5) + 1), 'wet_fiber');
             wet.scale.x = 0.1;
             wet.scale.y = 0.1;
             return false;
