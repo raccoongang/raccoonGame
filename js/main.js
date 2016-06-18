@@ -491,11 +491,12 @@ window.onload = function () {
 
         drawEnemy: function () {
             var leftCorrect = 0;
-//            if (this.enemy.state == 'right'){
-//                leftCorrect = -22;
-//            } else if (this.enemy.state == 'left'){
-//                leftCorrect = 22;
-//            }
+            var upCorrect = 0;
+            if (this.enemy.state == 'right'){
+                leftCorrect = -22;
+            } else if (this.enemy.state == 'left'){
+                leftCorrect = 22;
+            }
 //            var upCorrect = this.enemy.state == 'up' || this.enemy.state == 'down' ? 18 : 0;
 
             this.enemy.body.x = enemyStartX + this.enemy.positionX * enemyStepX + leftCorrect + upCorrect;
@@ -549,8 +550,6 @@ window.onload = function () {
         },
         
         processHandlerEnemyRaccoon: function (raccoon, cloth) {
-            console.log('bang');
-            console.log(this.enemy.positionY, cloth.line);
             if (((this.enemy.positionY == cloth.line) || 
                 (this.enemy.positionY == 0 &&  cloth.line == 2) ||
                 (this.enemy.positionY == 2 &&  cloth.line == 0)) && cloth.isEnemy)  {
