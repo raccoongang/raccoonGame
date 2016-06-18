@@ -81,7 +81,7 @@ window.onload = function () {
                     }
                 };
 
-                this.sock.send = function(message, callback){
+                this.sock._send = function(message, callback){
                     self.waitForConnection(function () {
                         self.sock.send(message);
                         if (typeof callback !== 'undefined') {
@@ -146,7 +146,7 @@ window.onload = function () {
                         
             var initMessage = this.composeInitMessage();    
             if (this.sock !== undefined) {
-                this.sock.send(initMessage);
+                this.sock._send(initMessage);
 
                 this.sock.onmessage = function (message) {
                     var data = JSON.parse(message.data);
@@ -171,7 +171,7 @@ window.onload = function () {
 //
 //                        }
                         this.drawEnemyStumps(data.stumps);
-                        this.sock.send(initMessage);
+                        this.sock._send(initMessage);
                     }
                     if (data.type == 'fiber' && data.id !== id && this.enemy !== undefined) {
                         console.log(data);
@@ -451,7 +451,7 @@ window.onload = function () {
             cloth.scale.x = 0.3;
             cloth.scale.y = 0.3;
             cloth.body.velocity.x = this.clothVelocity;
-            this.sock.send(this.composeFiber(cloth.line, this.clothVelocity));
+            this.sock._send(this.composeFiber(cloth.line, this.clothVelocity));
         },
         
         goEnemyFiber: function (line, velocity) {
@@ -586,7 +586,7 @@ window.onload = function () {
 
         sendToWS: function (pos) {
             if (this.sock !== undefined) {
-                this.sock.send(pos);
+                this.sock._send(pos);
             }
         },
 
