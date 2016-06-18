@@ -187,8 +187,9 @@ window.onload = function () {
                         this.enemy.raccoonLives = data.lives;
                         this.drawEnemyLives();
                     }
-                    else if (data.id !== id && this.enemy !== undefined) {
+                    if (data.type == 'update' && data.id !== id && this.enemy !== undefined) {
                         console.log(id, data.id);
+                        console.log('>>>>>>>', data.x, data.y);
                         this.enemy.positionX = data.x;
                         this.enemy.positionY = data.y;
                         this.enemy.state = data.state;
@@ -603,6 +604,7 @@ window.onload = function () {
             var pos = JSON.stringify({
                 _id: _id,
                 id: id,
+                type: 'update',
                 x: object.positionX,
                 y: object.positionY,
                 state: this.raccoon.state
