@@ -86,7 +86,7 @@ window.onload = function () {
             this.landscape = game.add.sprite(0, 0, 'landscape');
             this.waves = game.add.sprite(-1500, 330, 'waves');
             this.bucket = game.add.sprite(10, 650, 'bucket');
-            this.rsccoonLives = 5;
+            
 
             game.add.tween(this.waves).to({x: 1000}, 100000, 'Linear', true, 0, -1);
             this.bucket.scale.x = 0.2;
@@ -95,6 +95,7 @@ window.onload = function () {
             this.clothesGroup = game.add.physicsGroup();
             this.enemyGroup = game.add.physicsGroup();
             this.livesGroup = game.add.physicsGroup();
+            this.enenyLivesGroup = game.add.physicsGroup();
             this.drawStumps(this.stumpsArray);
             this.raccoon = game.add.sprite(raccoonStartX, raccoonStartY + 3 * raccoonStepY, 'raccoon_side', 0);
             this.raccoon.state = 'right'
@@ -105,6 +106,7 @@ window.onload = function () {
             this.raccoon.scale.y = 0.3;
             this.raccoon.positionX = 0;
             this.raccoon.positionY = 3;
+            this.raccoon.raccoonLives = 5;
             
             this.clothVelocity = 100;
 
@@ -116,7 +118,9 @@ window.onload = function () {
             this.bullets.setAll('checkWorldBounds', true);
 
             this.is_washing = false;
-            this.drawLives();    
+            this.drawLives(); 
+            
+            this.drawEnemyLives();
             
             var initMessage = this.composeInitMessage();    
             if (this.sock !== undefined) {
@@ -193,7 +197,7 @@ window.onload = function () {
                 if (cloth.body.x >= 1100){
                        cloth.kill();
                        this.clothesGroup.remove(cloth);    
-                       this.rsccoonLives -= 1;
+                       this.raccoon.raccoonLives -= 1;
                        this.drawLives();
                     }    
             }.bind(this)); 
@@ -336,8 +340,24 @@ window.onload = function () {
           this.livesGroup.forEach(function(live){
               live.kill();
           });
-          for(var i=1; i<=this.rsccoonLives; i++){
+          for(var i=1; i<=this.raccoon.raccoonLives; i++){
               var oneLive = this.livesGroup.create(550 - 50*i, 750, 'live');
+              oneLive.scale.x = 0.3;
+              oneLive.scale.y = 0.3;
+          }  
+        },
+        
+       drawEnemyLives: function(){
+          this.enenyLivesGroup.forEach(function(live){
+              if (live.enemy == true){
+                live.kill();
+              }
+          });
+           console.log(this.enemy.raccoonLives);
+          for(var i=1; i<=this.raccoon.raccoonLives; i++){
+              var oneLive = this.livesGroup.create(600 + 50*i, 750, 'live');
+              oneLive.enemy = true;
+              oneLive.tint = 0x000000;
               oneLive.scale.x = 0.3;
               oneLive.scale.y = 0.3;
           }  
@@ -443,17 +463,20 @@ window.onload = function () {
                 }, this);
                 if (cloth.body.x > raccoon.body.x) {
                     this.raccoon.loadTexture('raccoon_side', 0);
+                    this.raccoon.state = 'right';
                 }
                 else {
                     this.raccoon.loadTexture('raccoon_side', 1);
+                    this.raccoon.state = 'left';
                 }
+                this.drawRaccoon();
                 this.is_washing = true;
                 game.add.tween(this.raccoon).to({angle: -30}, 50, 'Linear', true, 0, 5, true);
                 setTimeout(function () {
                     this.is_washing = false;
                     game.add.tween(cloth).to({x: 10, y: 650}, 1000, 'Linear', true, 0);
-                    this.raccoon.pivot.setTo(1, 1);
-                    this.drawRaccoon();
+                    this.raccoon.angle = 0;
+                    splash.kill();
                 }.bind(this), 300);
 
             }
