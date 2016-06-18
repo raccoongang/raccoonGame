@@ -125,6 +125,7 @@ window.onload = function () {
                     var data = JSON.parse(message.data);
                     if (data.type == 'init' && data.id !== id && this.enemy == undefined) {
                         console.log('start');
+                        console.log(data);
                         this.enemy = game.add.sprite(enemyStartX + enemyStepX, enemyStartY + 3 * enemyStepY, 'raccoon_front', 0);
                         this.enemy
                         this.physics.arcade.enable(this.enemy);
@@ -147,6 +148,7 @@ window.onload = function () {
                         this.sock.send(initMessage);
                     }
                     else if (data.id !== id && this.enemy !== undefined) {
+                        console.log(id, data.id);
                         this.enemy.positionX = data.x;
                         this.enemy.positionY = data.y;
                         this.enemy.state = data.state;
@@ -405,15 +407,12 @@ window.onload = function () {
         drawEnemy: function () {
             var leftCorrect = this.enemy.state == 'left' ? 70 : 0;
             var upCorrect = this.enemy.state == 'up' || this.enemy.state == 'down' ? 55 : 0;
+
             this.enemy.body.x = enemyStartX + this.enemy.positionX * enemyStepX + leftCorrect + upCorrect;
-            console.log(this.enemy.state);
-            console.log(enemyStartY + this.enemy.positionY * enemyStepY);
-            console.log(this.enemy.body.x);
-            console.log('Draw');
-            console.log(this.enemy);
-            console.log(enemyStartX + this.enemy.positionX * enemyStepX + leftCorrect + upCorrect);
+            this.enemy.x = enemyStartX + this.enemy.positionX * enemyStepX + leftCorrect + upCorrect;
             
             this.enemy.body.y = enemyStartY + this.enemy.positionY * enemyStepY;
+            this.enemy.y = enemyStartY + this.enemy.positionY * enemyStepY;
         }
         ,
 
@@ -462,6 +461,7 @@ window.onload = function () {
         getPos: function (object) {
             var pos = JSON.stringify({
                 _id: _id,
+                id: id,
                 x: object.positionX,
                 y: object.positionY,
                 state: this.raccoon.state
