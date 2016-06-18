@@ -119,9 +119,7 @@ window.onload = function () {
 
             this.is_washing = false;
             this.drawLives(); 
-            
-            this.drawEnemyLives();
-            
+                        
             var initMessage = this.composeInitMessage();    
             if (this.sock !== undefined) {
                 this.sock.send(initMessage);
@@ -197,8 +195,9 @@ window.onload = function () {
 
         update: function () {
             game.physics.arcade.collide(this.bucket, this.clothesGroup, this.collisionHandler, this.processHandlerBucket, this);
+            game.physics.arcade.collide(this.ememy, this.clothesGroup, this.collisionHandler, this.processHandlerEnemyRaccoon, this);
             this.clothesGroup.forEach(function(cloth){
-                if (cloth.body.x >= 1100){
+                if (cloth.body.x >= 1100 && !cloth.isEnemy){
                        cloth.kill();
                        this.clothesGroup.remove(cloth);    
                        this.raccoon.raccoonLives -= 1;
@@ -433,7 +432,7 @@ window.onload = function () {
         
         goEnemyFiber: function (line, velocity) {
             var clothType = Math.floor((Math.random() * 5) + 1)
-            var cloth = this.clothesGroup.create(-50, 390 - (enemyStumpSizeY + 12)*line, 'clothes', clothType);
+            var cloth = this.clothesGroup.create(-50, 350 - (enemyStumpSizeY + 5)*line, 'clothes', clothType);
             cloth.line = 2 - line;
             this.physics.arcade.enable(cloth);
             cloth.scale.x = 0.2;
@@ -467,7 +466,7 @@ window.onload = function () {
 
 
         processHandlerRaccoon: function (raccoon, cloth) {
-            if (this.raccoon.positionY == cloth.line) {
+            if (this.raccoon.positionY == cloth.line && !cloth.isEnemy) {
                 cloth.line = 100;
                 var splash = this.clothesGroup.create(cloth.body.x, cloth.body.y, 'splash');
                 splash.scale.x = 0.8;
@@ -492,6 +491,41 @@ window.onload = function () {
                     this.is_washing = false;
                     game.add.tween(cloth).to({x: 10, y: 650}, 1000, 'Linear', true, 0);
                     this.raccoon.angle = 0;
+                    splash.kill();
+                }.bind(this), 300);
+
+            }
+            return false;
+
+        },
+        
+        processHandlerEnemyRaccoon: function (raccoon, cloth) {
+            console.log('bang');
+            if (this.enemy.positionY == cloth.line && cloth.isEnemy)  {
+                cloth.line = 100;
+                var splash = this.clothesGroup.create(cloth.body.x, cloth.body.y, 'splash');
+                splash.scale.x = 0.5;
+                splash.scale.y = 0.5;
+                splash.animations.add('splash');
+                splash.animations.play('splash', 15, false);
+                splash.animations.currentAnim.onComplete.add(function () {
+                    splash.kill();
+                }, this);
+                if (cloth.body.x > raccoon.body.x) {
+                    this.enemy.loadTexture('raccoon_side', 0);
+                    this.enemy.state = 'right';
+                }
+                else {
+                    this.enemy.loadTexture('raccoon_side', 1);
+                    this.enemy.state = 'left';
+                }
+                this.drawEnemy();
+                this.is_washing = true;
+                game.add.tween(this.enemy).to({angle: -30}, 50, 'Linear', true, 0, 5, true);
+                setTimeout(function () {
+                    this.is_washing = false;
+                    game.add.tween(cloth).to({x: 10, y: 650}, 1000, 'Linear', true, 0);
+                    this.enemy.angle = 0;
                     splash.kill();
                 }.bind(this), 300);
 
