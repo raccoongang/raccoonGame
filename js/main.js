@@ -41,14 +41,14 @@ window.onload = function () {
     var clothesGroup;
 
     var ip = "192.168.0.109";
-    try {
-        var sock = new WebSocket("ws://" + ip + ":5678/ws");
-    }
-    catch (err) {
-        console.log("Якась ... з вашими сокетами.");
-        var sock;
-    }
-
+//    try {
+//        var sock = new WebSocket("ws://" + ip + ":5678/ws");
+//    }
+//    catch (err) {
+//        console.log("Якась ... з вашими сокетами.");
+//        var sock;
+//    }
+    var sock;
     var enemy;
 
 
@@ -69,6 +69,7 @@ window.onload = function () {
             game.load.spritesheet('bucket', '/assets/bucket.png');
             game.load.spritesheet('wet_fiber', '/assets/wet_fiber.png');
             game.load.spritesheet('waves', '/assets/waves.png');
+            game.load.spritesheet('live', '/assets/live_logo.png');
 
             this.isUp = true;
 //           game.load.atlasJSONHash('bot', '/assets/running_bot.png', '/assets/running_bot.json');
@@ -83,43 +84,40 @@ window.onload = function () {
             game.physics.setBoundsToWorld();
 
 
-            game.add.sprite(0, 0, 'landscape');
-            this.waves = game.add.sprite(-300, 330, 'waves');
+            this.landscape = game.add.sprite(0, 0, 'landscape');
+            this.waves = game.add.sprite(-1500, 330, 'waves');
             this.bucket = game.add.sprite(10, 650, 'bucket');
+            this.rsccoonLives = 5;
+
             game.add.tween(this.waves).to({x: 1000}, 100000, 'Linear', true, 0, -1);
             this.bucket.scale.x = 0.2;
             this.bucket.scale.y = 0.2;
             this.physics.arcade.enable(this.bucket);
             this.clothesGroup = game.add.physicsGroup();
             this.enemyGroup = game.add.physicsGroup();
+            this.livesGroup = game.add.physicsGroup();
             this.drawStumps(this.stumpsArray);
             this.raccoon = game.add.sprite(raccoonStartX, raccoonStartY + 3 * raccoonStepY, 'raccoon_side', 0);
             this.raccoon.state = 'right'
+            this.physics.arcade.enable(this.raccoon);
+                        
+            this.raccoon.body.collideWorldBounds = true;
+            this.raccoon.scale.x = 0.3;
+            this.raccoon.scale.y = 0.3;
+            this.raccoon.positionX = 0;
+            this.raccoon.positionY = 3;
+            
+            this.clothVelocity = 100;
 
-            game.add.sprite(0, 0, 'landscape');
-            this.clothesGroup = game.add.physicsGroup();
-//            this.clothesGroup.addAt(game.add.physicsGroup, 0);
-//            this.clothesGroup.addAt(game.add.physicsGroup, 1);
-//            this.clothesGroup.addAt(game.add.physicsGroup, 2);
-            this.drawStumps(this.stumpsArray);
             this.bullets = game.add.physicsGroup();
             this.bullets.enableBody = true;
             this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
             this.bullets.createMultiple(1, 'wet_fiber');
             this.bullets.callAll('events.onOutOfBounds.add', 'events.onOutOfBounds', this.resetBullet, this);
             this.bullets.setAll('checkWorldBounds', true);
-            this.raccoon = game.add.sprite(raccoonStartX, raccoonStartY + 3 * raccoonStepY, 'raccoon_side', 0);
-            this.raccoon.state = 'right';
-            this.physics.arcade.enable(this.raccoon);
-
-            this.raccoon.body.collideWorldBounds = true;
-            this.raccoon.scale.x = 0.3;
-            this.raccoon.scale.y = 0.3;
-            this.raccoon.positionX = 0;
-            this.raccoon.positionY = 3;
 
             this.is_washing = false;
-
+            this.drawLives();    
             var initMessage = this.composeInitMessage();
 
             if (sock !== undefined) {
@@ -169,16 +167,27 @@ window.onload = function () {
 
             this.spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
             game.input.keyboard.addKeyCapture([Phaser.Keyboard.SPACEBAR]);
-
             cursors = game.input.keyboard.createCursorKeys();
 
         }
         ,
 
         update: function () {
-            game.physics.arcade.collide(this.raccoon, this.clothesGroup, this.collisionHandler, this.processHandlerRaccoon, this);
             game.physics.arcade.collide(this.bucket, this.clothesGroup, this.collisionHandler, this.processHandlerBucket, this);
+            this.clothesGroup.forEach(function(cloth){
+                if (cloth.body.x >= 1100){
+                       cloth.kill();
+                       this.clothesGroup.remove(cloth);    
+                       this.rsccoonLives -= 1;
+                       this.drawLives();
+                    }    
+            }.bind(this)); 
+            if (Math.floor((Math.random() * 3000)) < 10 ){
+                this.goFiber();
+            }
+            
             if (!this.is_washing) {
+                game.physics.arcade.collide(this.raccoon, this.clothesGroup, this.collisionHandler, this.processHandlerRaccoon, this);
                 if (cursors.left.isDown && this.isUp) {
                     if (this.raccoon.state != 'left') {
                         this.raccoon.state = 'left';
@@ -229,7 +238,6 @@ window.onload = function () {
                 }
 
                 else if (cursors.down.isDown && this.isUp) {
-                    this.goFiber();
                     if (this.raccoon.state != 'down') {
                         this.raccoon.loadTexture('raccoon_front', 0);
                         this.raccoon.state = 'down';
@@ -308,6 +316,18 @@ window.onload = function () {
             }
         }
         ,
+        
+        drawLives: function(){
+          this.livesGroup.forEach(function(live){
+              live.kill();
+          });
+            console.log(this.rsccoonLives);
+          for(var i=1; i<=this.rsccoonLives; i++){
+              var oneLive = this.livesGroup.create(550 - 50*i, 750, 'live');
+              oneLive.scale.x = 0.3;
+              oneLive.scale.y = 0.3;
+          }  
+        },
 
 
         canGoToDirection: function (direction) {
@@ -362,12 +382,14 @@ window.onload = function () {
         ,
 
         goFiber: function () {
-            var cloth = this.clothesGroup.create(-73, 560, 'clothes', 5);
-            cloth.line = 2;
+            var line = Math.floor((Math.random() * 3));
+            var clothType = Math.floor((Math.random() * 5) + 1)
+            var cloth = this.clothesGroup.create(-73, 560 - (stumpSizeY + 25)*line, 'clothes', clothType);
+            cloth.line = 2 - line;
             this.physics.arcade.enable(cloth);
             cloth.scale.x = 0.3;
             cloth.scale.y = 0.3;
-            cloth.body.velocity.x = 100;
+            cloth.body.velocity.x = this.clothVelocity;
         }
         ,
 
@@ -405,16 +427,14 @@ window.onload = function () {
                 else {
                     this.raccoon.loadTexture('raccoon_side', 1);
                 }
-                this.raccoon.pivot.setTo(0, 0);
-                this.raccoon.body.y -= 50;
                 this.is_washing = true;
-                game.add.tween(this.raccoon).to({angle: -30}, 150, 'Linear', true, 0, 5, true);
+                game.add.tween(this.raccoon).to({angle: -30}, 50, 'Linear', true, 0, 5, true);
                 setTimeout(function () {
                     this.is_washing = false;
                     game.add.tween(cloth).to({x: 10, y: 650}, 1000, 'Linear', true, 0);
                     this.raccoon.pivot.setTo(1, 1);
                     this.drawRaccoon();
-                }.bind(this), 800);
+                }.bind(this), 300);
 
             }
             return false;
@@ -430,13 +450,11 @@ window.onload = function () {
             wet.scale.y = 0.2;
             return false;
 
-        }
-        ,
+        },
 
         collisionHandler: function (raccoon, cloth) {
 
-        }
-        ,
+        },
 
         getPos: function (object) {
             var pos = JSON.stringify({
@@ -446,15 +464,13 @@ window.onload = function () {
                 state: this.raccoon.state
             });
             return pos;
-        }
-        ,
+        },
 
         sendToWS: function (pos) {
             if (sock !== undefined) {
                 sock.send(pos);
             }
-        }
-        ,
+        },
 
         composeInitMessage: function () {
             var initMessage = JSON.stringify({
@@ -468,7 +484,7 @@ window.onload = function () {
 
         throwClothes: function () {
             if (game.time.now > bulletTime) {
-                bullet = this.bullets.getFirstExists(false);
+                var bullet = this.bullets.getFirstExists(false);
 
                 if (bullet) {
                     var leftCorrect = this.raccoon.state == 'right' ? 80 : 0;
