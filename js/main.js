@@ -62,6 +62,8 @@ window.onload = function () {
             game.load.spritesheet('wet_fiber', '/assets/wet_fiber.png');
             game.load.spritesheet('waves', '/assets/waves.png');
             game.load.spritesheet('live', '/assets/live_logo.png');
+            game.load.spritesheet('clouds', '/assets/clouds.png');
+            game.load.spritesheet('sign', '/assets/sign.png');
 
             try {
                 this.sock = new WebSocket("ws://" + ip + ":5678/ws");
@@ -107,10 +109,16 @@ window.onload = function () {
 
 
             this.landscape = game.add.sprite(0, 0, 'landscape');
+            this.clouds = game.add.sprite(-900, 0, 'clouds');
             this.waves = game.add.sprite(-1500, 330, 'waves');
             this.bucket = game.add.sprite(10, 650, 'bucket');
 
             game.add.tween(this.waves).to({x: 1000}, 100000, 'Linear', true, 0, -1);
+            game.add.tween(this.clouds).to({x: 1000}, 100000, 'Linear', true, 0, -1);
+            
+            this.clouds.scale.x = 0.8;
+            this.clouds.scale.y = 0.8;
+            
             this.bucket.scale.x = 0.2;
             this.bucket.scale.y = 0.2;
             this.physics.arcade.enable(this.bucket);
@@ -144,6 +152,9 @@ window.onload = function () {
             var style = { font: "32px Arial", fill: "#ffffff", align: "center", };
             this.score_text = game.add.text(this.bucket.x, this.bucket.y + 100, "Score: "+this.score, style);
             this.drawLives();
+            this.sign = game.add.sprite(310, 655, 'sign', 0);
+            this.sign.scale.x = 0.5;
+            this.sign.scale.y = 0.5;
 
             var initMessage = this.composeInitMessage();    
             if (this.sock !== undefined) {
@@ -188,6 +199,9 @@ window.onload = function () {
                         console.log(data);
                         this.enemy.raccoonLives = data.lives;
                         this.drawEnemyLives();
+                    }
+                    if (data.type == 'enemy_fire' && data.id !== id && this.enemy !== undefined && data.id == this.enemy.id) {
+                        console.log(data);
                     }
                     if (data.type == 'update' && data.id !== id && this.enemy !== undefined && data.id == this.enemy.id) {
                         console.log(id, data.id);
@@ -243,7 +257,11 @@ window.onload = function () {
                        this.clothesGroup.remove(cloth);    
                        this.raccoon.raccoonLives -= 1;
                        this.drawLives();
+                       if (this.raccoon.raccoonLives == 0){
+                           this.create();
+                       }
                     }    
+                
             }.bind(this)); 
             if (Math.floor((Math.random() * 3000)) < 10 ){
                 this.goFiber();
