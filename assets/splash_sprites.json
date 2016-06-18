@@ -1,0 +1,92 @@
+{"frames": [
+
+  {
+    "filename": "splash00",
+    "frame": {"x":34,"y":128,"w":64,"h":64},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
+    "sourceSize": {"w":64,"h":64}
+  },
+  {
+    "filename": "splash01",
+    "frame": {"x":54,"y":0,"w":56,"h":58},
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": {"x":0,"y":3,"w":56,"h":58},
+    "sourceSize": {"w":64,"h":64}
+  },
+  {
+    "filename": "splash02",
+    "frame": {"x":54,"y":58,"w":56,"h":58},
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": {"x":0,"y":3,"w":56,"h":58},
+    "sourceSize": {"w":64,"h":64}
+  },
+  {
+    "filename": "splash03",
+    "frame": {"x":0,"y":192,"w":34,"h":64},
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": {"x":11,"y":0,"w":34,"h":64},
+    "sourceSize": {"w":64,"h":64}
+  },
+  {
+    "filename": "splash04",
+    "frame": {"x":0,"y":64,"w":54,"h":64},
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": {"x":1,"y":0,"w":54,"h":64},
+    "sourceSize": {"w":64,"h":64}
+  },
+  {
+    "filename": "splash05",
+    "frame": {"x":196,"y":0,"w":56,"h":58},
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": {"x":0,"y":3,"w":56,"h":58},
+    "sourceSize": {"w":64,"h":64}
+  },
+  {
+    "filename": "splash06",
+    "frame": {"x":0,"y":0,"w":54,"h":64},
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": {"x":1,"y":0,"w":54,"h":64},
+    "sourceSize": {"w":64,"h":64}
+  },
+  {
+    "filename": "splash07",
+    "frame": {"x":140,"y":0,"w":56,"h":58},
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": {"x":0,"y":3,"w":56,"h":58},
+    "sourceSize": {"w":64,"h":64}
+  },
+  {
+    "filename": "splash08",
+    "frame": {"x":34,"y":188,"w":50,"h":60},
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": {"x":3,"y":2,"w":50,"h":60},
+    "sourceSize": {"w":64,"h":64}
+  },
+  {
+    "filename": "splash09",
+    "frame": {"x":0,"y":128,"w":34,"h":64},
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": {"x":11,"y":0,"w":34,"h":64},
+    "sourceSize": {"w":64,"h":64}
+  }],
+  "meta": {
+    "app": "http://www.texturepacker.com",
+    "version": "1.0",
+    "image": "splash_Sprites.png",
+    "format": "RGBA8888",
+    "size": {"w":640,"h":64},
+    "scale": "0.8",
+    "smartupdate": "$TexturePacker:SmartUpdate:fb56f261b1eb04e3215824426595f64c$"
+  }
+}

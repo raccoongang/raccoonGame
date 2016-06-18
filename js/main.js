@@ -57,7 +57,8 @@ window.onload = function () {
             game.load.spritesheet('raccoon_front', '/assets/raccoon_front.png', 465, 511)
             game.load.spritesheet('clothes', '/assets/clothes.png', 226, 212);
             game.load.spritesheet('stump', '/assets/stump.png');
-            game.load.spritesheet('splash', '/assets/splash.png');
+            // game.load.spritesheet('splash', '/assets/splash.png');
+            game.load.spritesheet('splash', '/assets/splash_Sprites.png', 64, 64);
             game.load.spritesheet('bucket', '/assets/bucket.png');
             game.load.spritesheet('wet_fiber', '/assets/wet_fiber.png');
             game.load.spritesheet('waves', '/assets/waves.png');
@@ -421,8 +422,13 @@ window.onload = function () {
             if (this.raccoon.positionY == cloth.line) {
                 cloth.line = 100;
                 var splash = this.clothesGroup.create(cloth.body.x, cloth.body.y, 'splash');
-                splash.scale.x = 0.3;
-                splash.scale.y = 0.3;
+                splash.scale.x = 0.8;
+                splash.scale.y = 0.8;
+                splash.animations.add('splash');
+                splash.animations.play('splash', 15, false);
+                splash.animations.currentAnim.onComplete.add(function () {
+                    splash.kill();
+                }, this);
                 if (cloth.body.x > raccoon.body.x) {
                     this.raccoon.loadTexture('raccoon_side', 0);
                 }
