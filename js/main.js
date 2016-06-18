@@ -743,8 +743,6 @@ window.onload = function () {
             explosion.scale.y = 0.1;
             explosion.anchor.setTo(0.5, 0.5);
 
-            this.sendToWS(this.composeFire());
-
             var tween = game.add.tween(explosion.scale).to(
                 {y: 1, x: 1},
                 500,
@@ -757,6 +755,7 @@ window.onload = function () {
             }, this);
             tween.onComplete.add(function () {
                 explosion.kill();
+                this.sendToWS(this.composeFire());
             }, this);
         }
         
