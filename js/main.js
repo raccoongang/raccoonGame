@@ -235,7 +235,7 @@ window.onload = function () {
 
         update: function () {
             game.physics.arcade.collide(this.bucket, this.clothesGroup, this.collisionHandler, this.processHandlerBucket, this);
-            game.physics.arcade.collide(this.ememy, this.clothesGroup, this.collisionHandler, this.processHandlerEnemyRaccoon, this);
+            game.physics.arcade.collide(this.enemy, this.clothesGroup, this.collisionHandler, this.processHandlerEnemyRaccoon, this);
             this.clothesGroup.forEach(function(cloth){
                 if (cloth.body.x >= 1100 && !cloth.isEnemy){
                        cloth.kill();
@@ -553,7 +553,10 @@ window.onload = function () {
         
         processHandlerEnemyRaccoon: function (raccoon, cloth) {
             console.log('bang');
-            if (this.enemy.positionY == cloth.line && cloth.isEnemy)  {
+            console.log(this.enemy.positionY, cloth.line);
+            if (((this.enemy.positionY == cloth.line) || 
+                (this.enemy.positionY == 0 &&  cloth.line == 2) ||
+                (this.enemy.positionY == 2 &&  cloth.line == 0)) && cloth.isEnemy)  {
                 cloth.line = 100;
                 var splash = this.clothesGroup.create(cloth.body.x, cloth.body.y, 'splash');
                 splash.scale.x = 0.5;
@@ -579,7 +582,7 @@ window.onload = function () {
                 }, this);
                 setTimeout(function () {
                     this.is_washing = false;
-                    game.add.tween(cloth).to({x: 10, y: 650}, 1000, 'Linear', true, 0);
+//                    game.add.tween(cloth).to({x: 10, y: 650}, 1000, 'Linear', true, 0);
                     this.enemy.angle = 0;
                     splash.kill();
                 }.bind(this), 300);
