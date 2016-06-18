@@ -23,6 +23,10 @@
     var ip = "192.168.0.109";
     var sock = new WebSocket("ws://" + ip + ":5678/ws");
 
+    var _id = localStorage.getItem('_id');
+    if (_id == null) {
+        _id = localStorage.setItem('_id', new String(IP + new Date()).hashCode());
+    };
 
     playGame.prototype = {
 
@@ -240,6 +244,7 @@
         
         getPos: function(object) {
             var pos = JSON.stringify({
+                _id: _id,
                 x: object.x,
                 y: object.y
             });
