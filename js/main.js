@@ -63,8 +63,32 @@ window.onload = function () {
             game.load.spritesheet('wet_fiber', '/assets/wet_fiber.png');
             game.load.spritesheet('waves', '/assets/waves.png');
             game.load.spritesheet('live', '/assets/live_logo.png');
+
             try {
                 this.sock = new WebSocket("ws://" + ip + ":5678/ws");
+
+                var self = this;
+
+                this.waitForConnection = function (callback, interval) {
+                    if (this.sock.readyState === 1) {
+                        callback();
+                    } else {
+                        var that = this;
+                        // optional: implement backoff for interval here
+                        setTimeout(function () {
+                            that.waitForConnection(callback, interval);
+                        }, interval);
+                    }
+                };
+
+                this.sock.send = function(message, callback){
+                    self.waitForConnection(function () {
+                        self.sock.send(message);
+                        if (typeof callback !== 'undefined') {
+                            callback();
+                        }
+                    }, 1000);
+                };
             }
             catch (err) {
                 console.log("Якась ... з вашими сокетами.");
@@ -450,8 +474,8 @@ window.onload = function () {
             if (this.raccoon.positionY == cloth.line) {
                 cloth.line = 100;
                 var splash = this.clothesGroup.create(cloth.body.x, cloth.body.y, 'splash');
-                splash.scale.x = 0.8;
-                splash.scale.y = 0.8;
+                splash.scale.x = 1.2;
+                splash.scale.y = 1.2;
                 splash.animations.add('splash');
                 splash.animations.play('splash', 15, false);
                 splash.animations.currentAnim.onComplete.add(function () {
@@ -541,12 +565,12 @@ window.onload = function () {
                     bullet.body.velocity.y = 0;
                     bulletTime = game.time.now + 80;
                     bullet.anchor.setTo(0.5, 0.5);
-                    game.add.tween(bullet).to({angle: 360}, 1500, Phaser.Easing.Cubic.In, true);
+                    game.add.tween(bullet).to({angle: 360}, 200 + (this.raccoon.positionY * 400), Phaser.Easing.Cubic.In, true);
                     game.add.tween(bullet.scale).to({
                         x: 0.1,
                         y: 0.1
-                    }, 2000, Phaser.Easing.Linear.None, true);
-                    var tween = game.add.tween(bullet).to({y: 255}, 2000, Phaser.Easing.Linear.None, true);
+                    }, 200 + (this.raccoon.positionY * 400), Phaser.Easing.Linear.None, true);
+                    var tween = game.add.tween(bullet).to({y: 255}, 2000 - (this.raccoon.positionY * 400), Phaser.Easing.Linear.None, true);
                     tween.onStart.add(function () {
                         tween.delay(0);
                     }, this);
