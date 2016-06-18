@@ -688,6 +688,7 @@ window.onload = function () {
         },
 
         throwClothes: function (enemy_fire) {
+            console.log("throw clothes");
             if (game.time.now > bulletTime) {
                 this.raccoon.state = 'up';
                 this.raccoon.loadTexture('raccoon_front', 1);
@@ -736,6 +737,7 @@ window.onload = function () {
         },
 
         fireCollision: function(){
+            console.log("fire callback");
             this.enemy.state = 'up';
             this.enemy.loadTexture('raccoon_front', 0);
             var explosion = game.add.sprite(this.enemy.x, this.enemy.y, 'explosion');
@@ -757,6 +759,8 @@ window.onload = function () {
                 explosion.kill();
                 this.sendToWS(this.composeFire());
             }, this);
+
+            return false;
         }
         
 
