@@ -654,7 +654,7 @@ window.onload = function () {
                         true
                     );
                     var tween = game.add.tween(bullet).to(
-                        {y: 235, x: enemyStartX + this.raccoon.positionX * enemyStepX},
+                        {y: 235, x: enemyStartX + this.raccoon.positionX * enemyStepX + (raccoonSizeX*enemyScale)/2 - 20},
                         bullet_velocity + (this.raccoon.positionY * (bullet_velocity / this.raccoon.positionY ? this.raccoon.positionY : 1)),
                         Phaser.Easing.Linear.None,
                         true
