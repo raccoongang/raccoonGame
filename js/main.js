@@ -266,7 +266,7 @@ window.onload = function () {
                      difX = game.input.x - (this.raccoon.x + (raccoonSizeX*raccoonScale)/2);
                      difY = game.input.y - (this.raccoon.y + (raccoonSizeY*raccoonScale)/2);
                      
-                     if (Math.abs(difX) > (raccoonSizeX*raccoonScale)/2 || Math.abs(difY) > (raccoonSizeX*raccoonScale)/2) {
+                     if (Math.abs(difX) > this.raccoon.body.halfWidth || Math.abs(difY) > this.raccoon.body.halfHeight) {
                          if (Math.abs(difX) > Math.abs(difY)) {
                              if (difX > 0) { 
                                 direction = 'right';
@@ -282,6 +282,9 @@ window.onload = function () {
                                  direction = 'up';
                              }
                          }
+                     }
+                     else {
+                         direction = 'space';
                      }
                      this.tap = false;
                  }
@@ -344,7 +347,7 @@ window.onload = function () {
                     }.bind(this), 200);
                     this.sendToWS(this.getPos(this.raccoon));
                 }
-                else if (this.spaceKey.isDown && this.isUp) {
+                else if ((this.spaceKey.isDown && this.isUp) || direction === 'space') {
                     this.throwClothes(false);
                     this.isUp = false;
                     setTimeout(function () {
