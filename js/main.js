@@ -64,7 +64,8 @@ window.onload = function () {
             game.load.spritesheet('live', '/assets/live_logo.png');
             game.load.spritesheet('clouds', '/assets/clouds.png');
             game.load.spritesheet('sign', '/assets/sign.png');
-
+          
+            
             try {
 //                this.sock = new WebSocket("ws://" + ip + ":5678/ws");
                 this.sock = new WebSocket("wss://7f879664.ngrok.io/ws");    
@@ -111,6 +112,13 @@ window.onload = function () {
 
             game.add.tween(this.waves).to({x: 1000}, 100000, 'Linear', true, 0, -1);
             game.add.tween(this.clouds).to({x: 1000}, 100000, 'Linear', true, 0, -1);
+            
+            this.tap = false;
+            
+              
+            game.input.onTap.add(function() {
+              this.tap = true;
+            }.bind(this));
             
             this.clouds.scale.setTo(0.8, 0.8);
             this.bucket.scale.setTo(0.2, 0.2);
@@ -232,6 +240,7 @@ window.onload = function () {
         ,
 
         update: function () {
+            var direction, difX, difY;
             game.physics.arcade.collide(this.bucket, this.clothesGroup, this.collisionHandler, this.processHandlerBucket, this);
             game.physics.arcade.collide(this.enemyBucket, this.clothesGroup, this.collisionHandler, this.processHandlerEnemyBucket, this);
             game.physics.arcade.collide(this.enemy, this.clothesGroup, this.collisionHandler, this.processHandlerEnemyRaccoon, this);
@@ -253,8 +262,32 @@ window.onload = function () {
             }
             
             if (!this.is_washing) {
+                 if (this.tap) {
+                     difX = game.input.x - (this.raccoon.x + (raccoonSizeX*raccoonScale)/2);
+                     difY = game.input.y - (this.raccoon.y + (raccoonSizeY*raccoonScale)/2);
+                     
+                     if (Math.abs(difX) > (raccoonSizeX*raccoonScale)/2 || Math.abs(difY) > (raccoonSizeX*raccoonScale)/2) {
+                         if (Math.abs(difX) > Math.abs(difY)) {
+                             if (difX > 0) { 
+                                direction = 'right';
+                             }
+                             else {
+                                 direction = 'left';
+                             }
+                         } else {
+                             if (difY > 0) { 
+                                direction = 'down';
+                             }
+                             else {
+                                 direction = 'up';
+                             }
+                         }
+                     }
+                     this.tap = false;
+                 }
+                
                 game.physics.arcade.collide(this.raccoon, this.clothesGroup, this.collisionHandler, this.processHandlerRaccoon, this);
-                if (cursors.left.isDown && this.isUp) {
+                if ((cursors.left.isDown  && this.isUp) || direction === 'left') {
                     if (this.raccoon.state !== 'left') {
                         this.raccoon.state = 'left';
                         this.raccoon.loadTexture('raccoon', 0);
@@ -268,7 +301,7 @@ window.onload = function () {
                     }.bind(this), 200);
                     this.sendToWS(this.getPos(this.raccoon));
 
-                } else if (cursors.right.isDown && this.isUp) {
+                } else if ((cursors.right.isDown && this.isUp) || direction === 'right') {
                     if (this.raccoon.state !== 'right') {
                         this.raccoon.loadTexture('raccoon', 1);
                         this.raccoon.state = 'right';
@@ -284,7 +317,7 @@ window.onload = function () {
                     //                this.raccoon.animations.play('run');
                 }
 
-                else if (cursors.up.isDown && this.isUp) {
+                else if ((cursors.up.isDown && this.isUp) || direction === 'up') {
                     if (this.raccoon.state != 'up') {
                         this.raccoon.loadTexture('raccoon', 3);
                         this.raccoon.state = 'up';
@@ -297,7 +330,7 @@ window.onload = function () {
                         this.isUp = true;
                     }.bind(this), 200);
                     this.sendToWS(this.getPos(this.raccoon));
-                } else if (cursors.down.isDown && this.isUp) {
+                } else if ((cursors.down.isDown && this.isUp) || direction === 'down') {
                     if (this.raccoon.state !== 'down') {
                         this.raccoon.loadTexture('raccoon', 2);
                         this.raccoon.state = 'down';
