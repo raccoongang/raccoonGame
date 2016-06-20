@@ -67,7 +67,7 @@ window.onload = function () {
 
             try {
 //                this.sock = new WebSocket("ws://" + ip + ":5678/ws");
-                this.sock = new WebSocket("wss://0b4aee7f.ngrok.io/ws");    
+                this.sock = new WebSocket("wss://7f879664.ngrok.io/ws");    
                 var self = this;
 
                 this.waitForConnection = function (callback, interval) {
