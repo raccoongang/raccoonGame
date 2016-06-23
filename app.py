@@ -2,16 +2,23 @@
 
 import asyncio
 import websockets
+from websockets.exceptions import ConnectionClosed
 
 connected = set()
 
+# TODO investigate "Task was destroyed but it is pending!"
 async def handler(websocket, path):
     global connected
     connected.add(websocket)
 
     while True:
-        message = await websocket.recv()
-        await asyncio.wait([ws.send(message) for ws in connected])
+        try:
+            message = await websocket.recv()
+        except ConnectionClosed:
+            connected.remove(websocket)
+        else:
+            await asyncio.wait([ws.send(message) for ws in connected])
+
 
 start_server = websockets.serve(handler, '0.0.0.0', 5678)
 
