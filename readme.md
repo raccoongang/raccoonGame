@@ -24,3 +24,11 @@ start_server = websockets.serve(handler, '127.0.0.1', 5678)
 asyncio.get_event_loop().run_until_complete(start_server)
 asyncio.get_event_loop().run_forever()
 ```
+
+
+To run WebSocket server:
+
+    virtualenv venv3 --python=python3
+    source venv3/bin/activate
+    pip install -r requirements.txt
+    python app.py
