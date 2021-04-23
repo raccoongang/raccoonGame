@@ -1,0 +1,11 @@
+deploy-prod:
+  stage: deploy
+  tags:
+    - rtc-game
+    - prod
+    - deploy
+  only:
+    - master
+  script:
+    - cd /home/raccoon/raccoongame
+    - git pull
