@@ -200,8 +200,9 @@ window.onload = function () {
                         this.drawEnemyLives();
                     }
                     if (data.type === 'enemy_fire' && data.id !== id && this.enemy !== undefined && data.id === this.enemy.id) {
-                        var explosion = game.add.sprite(this.raccoon.x, this.raccoon.y, 'explosion');
-                        explosion.scale.setTo(0.1, 0.1);
+
+                        var explosion = game.add.sprite(game.world.width/2, game.world.height/2, 'wet_fiber');
+                        explosion.scale.setTo(7, 7);
                         explosion.anchor.setTo(0.5, 0.5);
 
                         var tween = game.add.tween(explosion.scale).to(
@@ -730,12 +731,14 @@ window.onload = function () {
             console.log("fire callback");
             this.enemy.state = 'up';
             this.enemy.loadTexture('raccoon', 2);
-            var explosion = game.add.sprite(this.enemy.x, this.enemy.y, 'explosion');
-            explosion.scale.setTo(0.1, 0.1);
-            explosion.anchor.setTo(0.5, 0.5);
+            var explosion = game.add.sprite(this.enemy.x, this.enemy.y, 'wet_fiber');
+            explosion.scale.setTo(0.01, 0.01);
+            explosion.anchor.setTo(-1, -1);
+            explosion.width = 10
+            explosion.height = 10
 
             var tween = game.add.tween(explosion.scale).to(
-                {y: 1, x: 1},
+                {y: 0.1, x: 0.1},
                 500,
                 Phaser.Easing.Linear.None,
                 true
