@@ -49,6 +49,9 @@ window.onload = function () {
     //    _id = localStorage.setItem('_id', new String(IP + new Date()).hashCode());
     //}
 
+    var hit;
+    var wash;
+
     playGame.prototype = {
 
         preload: function () {
@@ -64,11 +67,15 @@ window.onload = function () {
             game.load.spritesheet('live', './assets/live_logo.png');
             game.load.spritesheet('clouds', './assets/clouds.png');
             game.load.spritesheet('sign', './assets/sign.png');
-          
+
+            game.load.audio('hit', './assets/audio/hit.mp3');
+            game.load.audio('wash', './assets/audio/wash.mp3');
+
+            game.sound.setDecodedCallback([ hit, wash ], game.start, this);
             
             try {
-            //    this.sock = new WebSocket("ws://" + ip + ":5678/ws");
-                this.sock = new WebSocket("wss://213ac25374b2.ngrok.io/ws");    
+               this.sock = new WebSocket("ws://" + ip + ":5678/ws");
+                // this.sock = new WebSocket("wss://213ac25374b2.ngrok.io/ws");    
                 var self = this;
 
                 this.waitForConnection = function (callback, interval) {
@@ -114,8 +121,10 @@ window.onload = function () {
             game.add.tween(this.clouds).to({x: 1000}, 100000, 'Linear', true, 0, -1);
             
             this.tap = false;
-            
-              
+
+            hit = game.add.audio('hit');
+            wash = game.add.audio('wash');
+
             game.input.onTap.add(function() {
               this.tap = true;
             }.bind(this));
@@ -190,7 +199,6 @@ window.onload = function () {
 //                        }
                         this.drawEnemyStumps(data.stumps);
                         this.drawEnemyLives();
-                        console.log(this.enemyLivesGroup)
                         this.sock._send(initMessage);
                     }
                     if (data.type === 'fiber' && data.id !== id && this.enemy !== undefined && data.id === this.enemy.id) {
@@ -204,6 +212,7 @@ window.onload = function () {
                     }
                     if (data.type === 'enemy_fire' && data.id !== id && this.enemy !== undefined && data.id === this.enemy.id) {
 
+                        hit.play();
                         var explosion = game.add.sprite(game.world.width/2, game.world.height/2, 'wet_fiber');
                         explosion.scale.setTo(7, 7);
                         explosion.anchor.setTo(0.5, 0.5);
@@ -437,7 +446,7 @@ window.onload = function () {
         drawEnemyLives: function () {
             var i, oneLive;
             this.enemyLivesGroup.forEach(function (live) {
-              if (live.enemy == true){
+                if (live.enemy == true){
                     live.kill();
                     this.enemyLivesGroup.remove(live);
                 }
@@ -448,7 +457,7 @@ window.onload = function () {
                 oneLive.enemy = true;
                 oneLive.tint = 0x000000;
                 oneLive.scale.setTo(0.3, 0.3);
-            }  
+            }
         },
 
         canGoToDirection: function (direction) {
@@ -558,6 +567,7 @@ window.onload = function () {
                     this.raccoon.state = 'left';
                 }
                 this.drawRaccoon();
+                wash.play();
                 this.is_washing = true;
                 var tween = game.add.tween(this.raccoon).to({angle: -30}, 50, 'Linear', true, 0, 5, true);
                 tween.onComplete.add(function () { 
@@ -693,45 +703,44 @@ window.onload = function () {
                 this.clothes_bullet -= 1;
                 this.clothes_bullet_text.text = "Wet clothes: " + this.clothes_bullet;
                 if (game.time.now > bulletTime) {
-                this.raccoon.state = 'up';
-                this.raccoon.loadTexture('raccoon', 3);
-                var bullet = this.bullets.getFirstExists(false);
-                var bullet_velocity = 600;
+                    this.raccoon.state = 'up';
+                    this.raccoon.loadTexture('raccoon', 3);
+                    var bullet = this.bullets.getFirstExists(false);
+                    var bullet_velocity = 600;
 
-                if (bullet) {
-                    bullet.scale.setTo(0.4, 0.4);
-                    bullet.reset(this.raccoon.x + (raccoonSizeX*raccoonScale)/2, this.raccoon.body.y);
-                    bullet.body.velocity.y = 0;
-                    bullet.anchor.setTo(0.5, 0.5);
-                    game.add.tween(bullet).to(
-                        {angle: 360},
-                        bullet_velocity + (this.raccoon.positionY * (bullet_velocity / this.raccoon.positionY ? this.raccoon.positionY : 1)),
-                        Phaser.Easing.Cubic.In,
-                        true
-                    );
-                    game.add.tween(bullet.scale).to(
-                        {x: 0.1, y: 0.1},
-                        bullet_velocity + (this.raccoon.positionY * ((bullet_velocity * 2) / this.raccoon.positionY ? this.raccoon.positionY : 1)),
-                        Phaser.Easing.Linear.None,
-                        true
-                    );
-                    var tween = game.add.tween(bullet).to(
-                        {y: 235, x: enemyStartX + this.raccoon.positionX * enemyStepX + (raccoonSizeX*enemyScale)/2 - 20},
-                        bullet_velocity + (this.raccoon.positionY * (bullet_velocity / this.raccoon.positionY ? this.raccoon.positionY : 1)),
-                        Phaser.Easing.Linear.None,
-                        true
-                    );
-                    tween.onStart.add(function () {
-                        tween.delay(0);
-                    }, this);
-                    tween.onComplete.add(function () {
-                        this.resetBullet(bullet);
-                    }, this);
+                    if (bullet) {
+                        bullet.scale.setTo(0.4, 0.4);
+                        bullet.reset(this.raccoon.x + (raccoonSizeX*raccoonScale)/2, this.raccoon.body.y);
+                        bullet.body.velocity.y = 0;
+                        bullet.anchor.setTo(0.5, 0.5);
+                        game.add.tween(bullet).to(
+                            {angle: 360},
+                            bullet_velocity + (this.raccoon.positionY * (bullet_velocity / this.raccoon.positionY ? this.raccoon.positionY : 1)),
+                            Phaser.Easing.Cubic.In,
+                            true
+                        );
+                        game.add.tween(bullet.scale).to(
+                            {x: 0.1, y: 0.1},
+                            bullet_velocity + (this.raccoon.positionY * ((bullet_velocity * 2) / this.raccoon.positionY ? this.raccoon.positionY : 1)),
+                            Phaser.Easing.Linear.None,
+                            true
+                        );
+                        var tween = game.add.tween(bullet).to(
+                            {y: 235, x: enemyStartX + this.raccoon.positionX * enemyStepX + (raccoonSizeX*enemyScale)/2 - 20},
+                            bullet_velocity + (this.raccoon.positionY * (bullet_velocity / this.raccoon.positionY ? this.raccoon.positionY : 1)),
+                            Phaser.Easing.Linear.None,
+                            true
+                        );
+                        tween.onStart.add(function () {
+                            tween.delay(0);
+                        }, this);
+                        tween.onComplete.add(function () {
+                            this.resetBullet(bullet);
+                        }, this);
+                    }
                 }
             }
-
-            }
-            },
+        },
 
         resetBullet: function (bullet) {
             bullet.kill();
@@ -739,6 +748,7 @@ window.onload = function () {
 
         fireCollision: function(){
             console.log("fire callback");
+            hit.play();
             this.enemy.state = 'up';
             this.enemy.loadTexture('raccoon', 2);
             var explosion = game.add.sprite(this.enemy.x, this.enemy.y, 'wet_fiber');
@@ -768,7 +778,7 @@ window.onload = function () {
 
     render: function() {
 
-        game.debug.bodyInfo(this.raccoon, 32, 32);
+        // game.debug.bodyInfo(this.raccoon, 32, 32);
 
         // game.debug.body(this.raccoon);
         // game.debug.body(this.enemy);
