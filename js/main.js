@@ -150,8 +150,10 @@ window.onload = function () {
 
             this.is_washing = false;
             this.score = 0;
+            this.clothes_bullet = 0;
             var style = { font: "32px Arial", fill: "#ffffff", align: "center"};
-            this.score_text = game.add.text(this.bucket.x, this.bucket.y + 100, "Score: " + this.score, style);
+            this.score_text = game.add.text(game.world.width - 80, game.world.height + 45, "Score: " + this.score, style);
+            this.clothes_bullet_text = game.add.text(this.bucket.x, this.bucket.y + 100, "Wet clothes: " + this.clothes_bullet, style)
             this.drawLives();
             this.sign = game.add.sprite(310, 655, 'sign', 0);
             this.sign.scale.setTo(0.5, 0.5);
@@ -188,6 +190,7 @@ window.onload = function () {
 //                        }
                         this.drawEnemyStumps(data.stumps);
                         this.drawEnemyLives();
+                        console.log(this.enemyLivesGroup)
                         this.sock._send(initMessage);
                     }
                     if (data.type === 'fiber' && data.id !== id && this.enemy !== undefined && data.id === this.enemy.id) {
@@ -533,7 +536,9 @@ window.onload = function () {
 
         processHandlerRaccoon: function (raccoon, cloth) {
             if (this.raccoon.positionY == cloth.line && !cloth.isEnemy) {
-                this.score++;
+                this.score += 3;
+                this.clothes_bullet++;
+                this.clothes_bullet_text.text = "Wet clothes: " + this.clothes_bullet
                 this.score_text.text = "Score: " + this.score;
                 this.clothVelocity += this.score % 3;
                 cloth.line = 100;
@@ -684,7 +689,10 @@ window.onload = function () {
 
         throwClothes: function (enemy_fire) {
             console.log("throw clothes");
-            if (game.time.now > bulletTime) {
+            if (this.clothes_bullet > 0){
+                this.clothes_bullet -= 1;
+                this.clothes_bullet_text.text = "Wet clothes: " + this.clothes_bullet;
+                if (game.time.now > bulletTime) {
                 this.raccoon.state = 'up';
                 this.raccoon.loadTexture('raccoon', 3);
                 var bullet = this.bullets.getFirstExists(false);
@@ -721,13 +729,15 @@ window.onload = function () {
                     }, this);
                 }
             }
-        },
+
+            }
+            },
 
         resetBullet: function (bullet) {
             bullet.kill();
         },
 
-        fireCollision: function(bullet, ){
+        fireCollision: function(){
             console.log("fire callback");
             this.enemy.state = 'up';
             this.enemy.loadTexture('raccoon', 2);
