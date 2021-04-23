@@ -41,9 +41,7 @@ window.onload = function () {
         stumpIndent = [0, 8, 16, 24, 24, 16, 8, 0],
         fireIndent = [285, 372, 459, 546, 633, 720, 807, 894],
         enemyStumpIndent = [0, -8, -16, -24, -24, -16, -8, 0],
-        
-        ip = "192.168.0.109",
-    
+
         _id = localStorage.getItem('_id');
     //if (_id == null) {
     //    _id = localStorage.setItem('_id', new String(IP + new Date()).hashCode());
@@ -74,8 +72,7 @@ window.onload = function () {
             game.sound.setDecodedCallback([ hit, wash ], game.start, this);
             
             try {
-               this.sock = new WebSocket("ws://" + ip + ":5678/ws");
-                // this.sock = new WebSocket("wss://213ac25374b2.ngrok.io/ws");    
+                this.sock = new WebSocket("wss://rtc-game.raccoongang.com/ws");
                 var self = this;
 
                 this.waitForConnection = function (callback, interval) {
