@@ -133,6 +133,8 @@ window.onload = function () {
             this.enemyGroup = game.add.physicsGroup();
             this.livesGroup = game.add.physicsGroup();
             this.enemyLivesGroup = game.add.physicsGroup();
+            this.BucketGroup = game.add.physicsGroup();
+            this.EnemyBucketGroup = game.add.physicsGroup();
             this.drawStumps(this.stumpsArray);
             this.raccoon = game.add.sprite(raccoonStartX, raccoonStartY + 3 * raccoonStepY, 'raccoon', 1);
             this.raccoon.state = 'right';
@@ -228,6 +230,11 @@ window.onload = function () {
                             explosion.kill();
                         }, this);
                         console.log(data);
+                    }
+                    if ( data.type === "enemy_throw" && data.id !== id && this.enemy !== undefined && data.id === this.enemy.id) {
+                        if ( this.EnemyBucketGroup.children.length > 0) {
+                            this.EnemyBucketGroup.children[0].destroy();
+                        }
                     }
                     if (data.type === 'update' && data.id !== id && this.enemy !== undefined && data.id === this.enemy.id) {
                         console.log(id, data.id);
@@ -621,8 +628,12 @@ window.onload = function () {
 
         processHandlerBucket: function (bucket, cloth) {
             cloth.kill();
+
             var wet = game.add.sprite(40 + Math.floor((Math.random() * 25) + 1), 675 + Math.floor((Math.random() * 10) + 1), 'wet_fiber');
             wet.scale.setTo(0.2, 0.2);
+
+            this.BucketGroup.add(wet);
+
             return false;
 
         },
@@ -631,6 +642,9 @@ window.onload = function () {
 
             var wet = game.add.sprite(1110 + Math.floor((Math.random() * 15) + 1), 220 + Math.floor((Math.random() * 5) + 1), 'wet_fiber');
             wet.scale.setTo(0.1, 0.1);
+
+            this.EnemyBucketGroup.add(wet);
+
             return false;
 
         },
@@ -694,10 +708,24 @@ window.onload = function () {
             return fireMessage;
         },
 
+        composeThrow: function () {
+            var throwMessage = JSON.stringify({
+                id: id,
+                type: 'enemy_throw'
+            });
+            return throwMessage;
+        },
+
         throwClothes: function (enemy_fire) {
             console.log("throw clothes");
+
+            if ( this.BucketGroup.children.length > 0) {
+                this.BucketGroup.children[0].destroy();
+            }
+
             if (this.clothes_bullet > 0){
                 this.clothes_bullet -= 1;
+                this.sendToWS(this.throwClothes());
                 this.clothes_bullet_text.text = "Wet clothes: " + this.clothes_bullet;
                 if (game.time.now > bulletTime) {
                     this.raccoon.state = 'up';
